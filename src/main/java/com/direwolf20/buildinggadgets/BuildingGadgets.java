@@ -10,20 +10,17 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-// The value here should match an entry in the META-INF/mods.toml file
 @Mod(BuildingGadgets.MOD_ID)
 public class BuildingGadgets
 {
     public static final String MOD_ID = "buildinggadgets";
-
-    // Directly reference a log4j logger.
     private static final Logger LOGGER = LogManager.getLogger();
 
     public BuildingGadgets() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientSetup);
 
-        // Register ourselves for server and other game events we are interested in
+        // Todo: remove once events have their own classes
         MinecraftForge.EVENT_BUS.register(this);
     }
 
