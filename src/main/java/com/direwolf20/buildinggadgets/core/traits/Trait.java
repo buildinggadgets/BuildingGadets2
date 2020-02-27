@@ -1,12 +1,12 @@
-package com.direwolf20.buildinggadgets.core.characteristics;
+package com.direwolf20.buildinggadgets.core.traits;
 
 
 import java.util.Objects;
 
-public final class Characteristic<T> {
+public final class Trait<T> {
     private final Class<T> type;
 
-    public Characteristic(Class<T> type) {
+    public Trait(Class<T> type) {
         this.type = type;
     }
 

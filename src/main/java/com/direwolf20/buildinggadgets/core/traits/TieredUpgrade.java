@@ -1,4 +1,4 @@
-package com.direwolf20.buildinggadgets.core.characteristics;
+package com.direwolf20.buildinggadgets.core.traits;
 
 
 import com.google.common.base.Preconditions;
@@ -21,11 +21,11 @@ public final class TieredUpgrade {
         return upgrade;
     }
 
-    public <T> UnaryOperator<T> getModificatorFor(Characteristic<T> characteristic) {
+    public <T> UnaryOperator<T> getModificatorFor(Trait<T> characteristic) {
         return upgrade.getModificatorFor(characteristic, tier);
     }
 
-    public ImmutableSet<Characteristic<?>> getAppliedModifications() {
+    public ImmutableSet<Trait<?>> getAppliedModifications() {
         return getUpgrade().getAppliedModifications();
     }
 

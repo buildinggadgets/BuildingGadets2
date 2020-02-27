@@ -1,15 +1,15 @@
-package com.direwolf20.buildinggadgets.core.characteristics;
+package com.direwolf20.buildinggadgets.core.traits;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-final class CharacteristicValue<T> {
+final class TraitValue<T> {
     private final Supplier<T> defaultValue;
     private final Map<TieredUpgrade, UnaryOperator<T>> modificators;
 
-    CharacteristicValue(Supplier<T> defaultValue) {
+    TraitValue(Supplier<T> defaultValue) {
         this.defaultValue = defaultValue;
         this.modificators = new LinkedHashMap<>();
     }

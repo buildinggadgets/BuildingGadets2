@@ -1,4 +1,4 @@
-package com.direwolf20.buildinggadgets.core.characteristics;
+package com.direwolf20.buildinggadgets.core.traits;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -7,8 +7,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public interface ICharacteristicContainer extends INBTSerializable<CompoundNBT> {
-   <T> Optional<T> getCharacteristic(Characteristic<T> characteristic);
+public interface ITraitContainer extends INBTSerializable<CompoundNBT> {
+   <T> Optional<T> getCharacteristic(Trait<T> characteristic);
 
    Set<TieredUpgrade> listTiers();
 
