@@ -5,11 +5,8 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraftforge.common.util.Constants.NBT;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.function.Supplier;
 
 public final class SimpleTraitContainer implements ITraitContainer {
     private static final String KEY_INSTALLED_UPGRADES = "installed_upgrades";
@@ -18,12 +15,10 @@ public final class SimpleTraitContainer implements ITraitContainer {
     private Set<Upgrade> installedUpgrades;
     private Set<TieredUpgrade> installedTiers;
 
-    private SimpleTraitContainer(Map<Trait<?>, TraitValue<?>> traits, Set<TieredUpgrade> installedTiers) {
+    private SimpleTraitContainer(Map<Trait<?>, TraitValue<?>> traits) {
         this.traits = traits;
-        this.installedTiers = installedTiers;
-        this.installedUpgrades = installedTiers.stream()
-                .map(TieredUpgrade::getUpgrade)
-                .collect(Collectors.toSet());
+        this.installedTiers = new LinkedHashSet<>();
+        this.installedUpgrades = new HashSet<>();
     }
 
     @Override
@@ -51,7 +46,7 @@ public final class SimpleTraitContainer implements ITraitContainer {
             return false;
         for (Trait<?> characteristic : upgrade.getAppliedModifications()) {
             if (!applyModificator(characteristic, traits.get(characteristic), upgrade))
-                throw new RuntimeException("Found inconsistency in registered upgrades and known upgrades by charactersitics. This is a bug!");
+                throw new RuntimeException("Found inconsistency in registered upgrades and known upgrades by traits. This is a bug!");
         }
         return installedTiers.add(upgrade) && installedUpgrades.add(upgrade.getUpgrade());
     }
@@ -67,7 +62,7 @@ public final class SimpleTraitContainer implements ITraitContainer {
             return false;
         for (Trait<?> characteristic : upgrade.getAppliedModifications()) {
             if (traits.get(characteristic).removeModificator(upgrade))
-                throw new RuntimeException("Found inconsistency in registered upgrades and known upgrades by charactersitics. This is a bug!");
+                throw new RuntimeException("Found inconsistency in registered upgrades and known upgrades by traits. This is a bug!");
         }
         return installedTiers.remove(upgrade) && installedUpgrades.remove(upgrade.getUpgrade());
     }
@@ -95,6 +90,23 @@ public final class SimpleTraitContainer implements ITraitContainer {
         for (INBT serializedTier: list) {
             TieredUpgrade upgrade = TieredUpgrade.deserialize((CompoundNBT) serializedTier);
             installUpgrade(upgrade);
+        }
+    }
+
+    public static final class Builder {
+        private final Map<Trait<?>, TraitValue<?>> traits;
+
+        public Builder() {
+            this.traits = new HashMap<>();
+        }
+
+        public <T> Builder putTrait(Trait<T> trait, Supplier<T> defaultSupplier) {
+            this.traits.put(trait, new TraitValue<>(defaultSupplier));
+            return this;
+        }
+
+        public SimpleTraitContainer build() {
+            return new SimpleTraitContainer(traits);
         }
     }
 }

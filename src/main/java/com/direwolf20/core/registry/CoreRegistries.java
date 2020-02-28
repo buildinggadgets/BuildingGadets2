@@ -5,6 +5,7 @@ import com.direwolf20.core.traits.Upgrade;
 import com.google.common.base.Preconditions;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.registries.ForgeRegistry;
@@ -21,10 +22,15 @@ public enum CoreRegistries {
         return UPGRADES;
     }
 
+    @SubscribeEvent
     public static void onCreateRegistries(RegistryEvent.NewRegistry event) {
+        DireCore20.LOG.debug("Creating Registries");
         UPGRADES = (ForgeRegistry<Upgrade>) new RegistryBuilder<Upgrade>()
+                .setType(Upgrade.class)
                 .setName(UPGRADE_REGISTRY_NAME)
-                .setDefaultKey(CoreUpgrades.UPGRADE_BLANK_RL)
+                .setDefaultKey(Upgrade.UPGRADE_BLANK_RL)
                 .create();
+        CoreUpgrades.onUpgradesCreated();
+        DireCore20.LOG.debug("Registry creation finished");
     }
 }
