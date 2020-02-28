@@ -1,4 +1,4 @@
-package com.direwolf20.buildinggadgets.core.traits;
+package com.direwolf20.core.traits;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,5 +30,9 @@ final class TraitValue<T> {
 
     boolean removeModificator(TieredUpgrade upgrade) {
         return modificators.remove(upgrade)!=null;
+    }
+
+    void clearModificators() {
+        modificators.clear();
     }
 }

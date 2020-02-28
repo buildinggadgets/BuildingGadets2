@@ -1,4 +1,4 @@
-package com.direwolf20.buildinggadgets.core.traits;
+package com.direwolf20.core.traits;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -15,7 +15,6 @@ public interface ITraitContainer extends INBTSerializable<CompoundNBT> {
    default Set<Upgrade> listUpgrades() {
       return listTiers().stream().map(TieredUpgrade::getUpgrade).collect(Collectors.toSet());
    }
-
 
    boolean installUpgrade(TieredUpgrade upgrade);
 

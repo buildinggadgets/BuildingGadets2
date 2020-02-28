@@ -1,6 +1,9 @@
-package com.direwolf20.buildinggadgets.core.traits;
+package com.direwolf20.core.traits;
 
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraftforge.common.util.Constants.NBT;
 
 import java.util.Collections;
 import java.util.Map;
@@ -9,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class SimpleTraitContainer implements ITraitContainer {
+    private static final String KEY_INSTALLED_UPGRADES = "installed_upgrades";
     private Map<Trait<?>, TraitValue<?>> traits;
     //for ease of lookup
     private Set<Upgrade> installedUpgrades;
@@ -70,11 +74,27 @@ public final class SimpleTraitContainer implements ITraitContainer {
 
     @Override
     public CompoundNBT serializeNBT() {
-        return null;
+        CompoundNBT compound = new CompoundNBT();
+        ListNBT installedUpgrades = new ListNBT();
+        for (TieredUpgrade upgrade:installedTiers)
+            installedUpgrades.add(upgrade.serializeNBT());
+        compound.put(KEY_INSTALLED_UPGRADES, installedUpgrades);
+        return compound;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-
+        if (!nbt.contains(KEY_INSTALLED_UPGRADES, NBT.TAG_LIST))
+            return;
+        ListNBT list = (ListNBT) nbt.get(KEY_INSTALLED_UPGRADES);
+        assert list!=null;
+        installedUpgrades.clear();
+        installedTiers.clear();
+        for (TraitValue<?> val:traits.values())
+            val.clearModificators();
+        for (INBT serializedTier: list) {
+            TieredUpgrade upgrade = TieredUpgrade.deserialize((CompoundNBT) serializedTier);
+            installUpgrade(upgrade);
+        }
     }
 }
