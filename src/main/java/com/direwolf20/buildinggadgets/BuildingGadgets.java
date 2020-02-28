@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 public class BuildingGadgets
 {
     public static final String MOD_ID = "buildinggadgets";
-    private static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOG = LogManager.getLogger();
 
     public BuildingGadgets() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
@@ -34,9 +34,5 @@ public class BuildingGadgets
 
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
-    }
-
-    public static Logger getLogger() {
-        return LOGGER;
     }
 }
