@@ -1,5 +1,7 @@
 package com.direwolf20.core.traits;
 
+import com.direwolf20.core.traits.upgrade.TieredUpgrade;
+import com.direwolf20.core.traits.upgrade.Upgrade;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
@@ -8,6 +10,10 @@ import net.minecraftforge.common.util.Constants.NBT;
 import java.util.*;
 import java.util.function.Supplier;
 
+/**
+ * The default implementation for an {@link ITraitContainer} which is created via it's own {@link Builder}, to add
+ * the {@link Trait Trait's} which are available from this container.
+ */
 public final class SimpleTraitContainer implements ITraitContainer {
     private static final String KEY_INSTALLED_UPGRADES = "installed_upgrades";
     private Map<Trait<?>, TraitValue<?>> traits;
@@ -22,10 +28,10 @@ public final class SimpleTraitContainer implements ITraitContainer {
     }
 
     @Override
-    public <T> Optional<T> getCharacteristic(Trait<T> characteristic) {
-        return Optional.ofNullable(traits.get(characteristic))
+    public <T> Optional<T> getTrait(Trait<T> trait) {
+        return Optional.ofNullable(traits.get(trait))
                 .map(TraitValue::getValue)
-                .map(characteristic::cast);
+                .map(trait::cast);
     }
 
     @Override
@@ -93,13 +99,27 @@ public final class SimpleTraitContainer implements ITraitContainer {
         }
     }
 
+    /**
+     * A very minimalistic builder which allows specifying of {@link Trait Traits} for the {@link SimpleTraitContainer}.
+     * Notice how it defines the backing map for the container as an {@link IdentityHashMap}...
+     */
     public static final class Builder {
         private final Map<Trait<?>, TraitValue<?>> traits;
 
         public Builder() {
-            this.traits = new HashMap<>();
+            //Traits don't override hashcode or equals... IdentityHashMap for the win!
+            //We don't care about the slightly larger memory footprint compared to ImmutableMap
+            // - the performance is more important here
+            this.traits = new IdentityHashMap<>();
         }
 
+        /**
+         * Add/Replace a trait in this builder.
+         * @param trait The {@link Trait}
+         * @param defaultSupplier
+         * @param <T>
+         * @return
+         */
         public <T> Builder putTrait(Trait<T> trait, Supplier<T> defaultSupplier) {
             this.traits.put(trait, new TraitValue<>(defaultSupplier));
             return this;

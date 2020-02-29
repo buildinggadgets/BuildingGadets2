@@ -1,10 +1,16 @@
 package com.direwolf20.core.traits;
 
+import com.direwolf20.core.traits.upgrade.TieredUpgrade;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
+/**
+ * Utility class for managing the value represented by a {@link Trait} in some {@link ITraitContainer}.
+ * @param <T> The type of value
+ */
 final class TraitValue<T> {
     private final Supplier<T> defaultValue;
     private final Map<TieredUpgrade, UnaryOperator<T>> modificators;
