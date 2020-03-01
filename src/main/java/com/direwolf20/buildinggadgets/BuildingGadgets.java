@@ -1,6 +1,8 @@
 package com.direwolf20.buildinggadgets;
 
+import com.direwolf20.core.DireCore20;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -17,8 +19,11 @@ public class BuildingGadgets
     public static final Logger LOG = LogManager.getLogger();
 
     public BuildingGadgets() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientSetup);
+        //load the core from within here for now...
+        new DireCore20();
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        bus.addListener(this::setup);
+        bus.addListener(this::clientSetup);
 
         // Todo: remove once events have their own classes
         MinecraftForge.EVENT_BUS.register(this);
