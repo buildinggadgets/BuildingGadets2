@@ -45,12 +45,12 @@ public final class UpgradeBuilder {
         return putModification(trait, tieredUpgrade -> ((Double d) -> (additionFactory.apply(tieredUpgrade) + d)));
     }
 
-    public UpgradeBuilder multiplicationModifier(Trait<Integer> trait, Function<TieredUpgrade, Integer> additionFactory) {
-        return putModification(trait, tieredUpgrade -> ((Integer i) -> (additionFactory.apply(tieredUpgrade) * i)));
+    public UpgradeBuilder multiplicationModifier(Trait<Integer> trait, Function<TieredUpgrade, Integer> multiplicationFactory) {
+        return putModification(trait, tieredUpgrade -> ((Integer i) -> (multiplicationFactory.apply(tieredUpgrade) * i)));
     }
 
-    public UpgradeBuilder floatMultiplicationModifier(Trait<Double> trait, Function<TieredUpgrade, Double> additionFactory) {
-        return putModification(trait, tieredUpgrade -> ((Double d) -> (additionFactory.apply(tieredUpgrade) * d)));
+    public UpgradeBuilder floatMultiplicationModifier(Trait<Double> trait, Function<TieredUpgrade, Double> multiplicationFactory) {
+        return putModification(trait, tieredUpgrade -> ((Double d) -> (multiplicationFactory.apply(tieredUpgrade) * d)));
     }
 
     public UpgradeBuilder activationModifier(Trait<Boolean> trait) {

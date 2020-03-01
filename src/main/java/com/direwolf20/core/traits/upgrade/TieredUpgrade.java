@@ -1,7 +1,7 @@
 package com.direwolf20.core.traits.upgrade;
 
 
-import com.direwolf20.core.registry.CoreRegistries;
+import com.direwolf20.core.registry.Registries;
 import com.direwolf20.core.traits.Trait;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
@@ -27,9 +27,9 @@ public final class TieredUpgrade  {
         int tier = nbt.getInt(KEY_TIER);
         Upgrade upgrade;
         if (nbt.contains(KEY_UPGRADE_ID, NBT.TAG_STRING))
-            upgrade = CoreRegistries.getUpgradeRegistry().getValue(new ResourceLocation(nbt.getString(KEY_UPGRADE_ID)));
+            upgrade = Registries.getUpgradeRegistry().getValue(new ResourceLocation(nbt.getString(KEY_UPGRADE_ID)));
         else
-            upgrade = CoreRegistries.getUpgradeRegistry().getValue(nbt.getInt(KEY_UPGRADE_ID));
+            upgrade = Registries.getUpgradeRegistry().getValue(nbt.getInt(KEY_UPGRADE_ID));
         return new TieredUpgrade(upgrade, tier);
     }
 
@@ -67,7 +67,7 @@ public final class TieredUpgrade  {
         if (persistent)
             compound.putString(KEY_UPGRADE_ID, getUpgrade().getRegistryName().toString());
         else
-            compound.putInt(KEY_UPGRADE_ID, CoreRegistries.getUpgradeRegistry().getID(getUpgrade()));
+            compound.putInt(KEY_UPGRADE_ID, Registries.getUpgradeRegistry().getID(getUpgrade()));
         compound.putInt(KEY_TIER, level);
         return compound;
     }

@@ -12,7 +12,7 @@ import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 
 @EventBusSubscriber(bus = Bus.MOD)
-public enum CoreRegistries {
+public enum Registries {
     ;
     public static final ResourceLocation UPGRADE_REGISTRY_NAME = new ResourceLocation(DireCore20.MOD_ID +":upgrade_type");
     private static ForgeRegistry<Upgrade> UPGRADES = null;
@@ -30,7 +30,7 @@ public enum CoreRegistries {
                 .setName(UPGRADE_REGISTRY_NAME)
                 .setDefaultKey(Upgrade.UPGRADE_BLANK_RL)
                 .create();
-        CoreUpgrades.onUpgradesCreated();
+        Upgrades.onUpgradesCreated();
         DireCore20.LOG.debug("Registry creation finished");
     }
 }
