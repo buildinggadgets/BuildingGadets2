@@ -31,6 +31,13 @@ public abstract class Upgrade extends ForgeRegistryEntry<Upgrade> {
 
     protected abstract boolean isValidLevel(int level);
 
-
+    /**
+     * @param trait The {@link Trait} for which to retrieve a modification function.
+     * @param tier The {@link TieredUpgrade} representing additional data for this upgrade.
+     * @param <T> The type of the trait. As this also defines the type of values represented by it, it also obviously defines the type on which the
+     *           modification function operates on.
+     * @return the Modification Function for the given Trait. May only be null, if the trait was no in the Set returned by {@link #getAppliedModifications()}
+     *         or if the data in the {@link TieredUpgrade} did not match
+     */
     public abstract <T> UnaryOperator<T> getModificatorFor(Trait<T> trait, TieredUpgrade tier);
 }

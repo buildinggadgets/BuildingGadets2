@@ -14,14 +14,18 @@ import java.util.function.Supplier;
  * The default implementation for an {@link ITraitContainer} which is created via it's own {@link Builder}, to add
  * the {@link Trait Trait's} which are available from this container.
  */
-public final class SimpleTraitContainer implements ITraitContainer {
+public final class TraitContainer implements ITraitContainer {
+    public static Builder builder() {
+        return new Builder();
+    }
+
     private static final String KEY_INSTALLED_UPGRADES = "installed_upgrades";
     private Map<Trait<?>, TraitValue<?>> traits;
     //for ease of lookup
     private Set<Upgrade> installedUpgrades;
     private Set<TieredUpgrade> installedTiers;
 
-    private SimpleTraitContainer(Map<Trait<?>, TraitValue<?>> traits) {
+    private TraitContainer(Map<Trait<?>, TraitValue<?>> traits) {
         this.traits = traits;
         this.installedTiers = new LinkedHashSet<>();
         this.installedUpgrades = new HashSet<>();
@@ -100,13 +104,13 @@ public final class SimpleTraitContainer implements ITraitContainer {
     }
 
     /**
-     * A very minimalistic builder which allows specifying of {@link Trait Traits} for the {@link SimpleTraitContainer}.
+     * A very minimalistic builder which allows specifying of {@link Trait Traits} for the {@link TraitContainer}.
      * Notice how it defines the backing map for the container as an {@link IdentityHashMap}...
      */
     public static final class Builder {
         private final Map<Trait<?>, TraitValue<?>> traits;
 
-        public Builder() {
+        private Builder() {
             //Traits don't override hashcode or equals... IdentityHashMap for the win!
             //We don't care about the slightly larger memory footprint compared to ImmutableMap
             // - the performance is more important here
@@ -115,18 +119,19 @@ public final class SimpleTraitContainer implements ITraitContainer {
 
         /**
          * Add/Replace a trait in this builder.
-         * @param trait The {@link Trait}
-         * @param defaultSupplier
-         * @param <T>
-         * @return
+         * @param trait The {@link Trait} to add or replace
+         * @param defaultSupplier The default value supplier for the trait
+         * @param <T> The type of the trait and it's corresponding values
+         * @return The builder instance
+         * @throws NullPointerException if trait or defaultSupplier are null
          */
         public <T> Builder putTrait(Trait<T> trait, Supplier<T> defaultSupplier) {
-            this.traits.put(trait, new TraitValue<>(defaultSupplier));
+            this.traits.put(Objects.requireNonNull(trait), new TraitValue<>(Objects.requireNonNull(defaultSupplier)));
             return this;
         }
 
-        public SimpleTraitContainer build() {
-            return new SimpleTraitContainer(traits);
+        public TraitContainer build() {
+            return new TraitContainer(traits);
         }
     }
 }

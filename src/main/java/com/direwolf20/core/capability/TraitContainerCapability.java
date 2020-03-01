@@ -2,7 +2,7 @@ package com.direwolf20.core.capability;
 
 import com.direwolf20.core.DireCore20;
 import com.direwolf20.core.traits.ITraitContainer;
-import com.direwolf20.core.traits.SimpleTraitContainer;
+import com.direwolf20.core.traits.TraitContainer;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
@@ -30,6 +30,6 @@ public final class TraitContainerCapability {
             public void readNBT(Capability<ITraitContainer> capability, ITraitContainer instance, Direction side, INBT nbt) {
                 instance.deserializeNBT((CompoundNBT)nbt);
             }
-        }, () -> new SimpleTraitContainer.Builder().build());
+        }, () -> TraitContainer.builder().build());
     }
 }
