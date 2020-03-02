@@ -71,12 +71,15 @@ public final class PropertyContainer implements IPropertyContainer{
     public static final class Builder {
         private Map<Property<?>, Object> properties;
         private Map<String, Property<?>> propertyByName;
-        private final Set<MutableProperty<?>> mutableProperties;
+        //this is needed to allow the builder to degrade mutable properties to immutable ones
+        private Map<Property<?>, MutableProperty<?>> propertyToMutableIndex;
+        private Set<MutableProperty<?>> mutableProperties;
 
         public Builder() {
             this.properties = new IdentityHashMap<>();
             this.propertyByName = new HashMap<>();
             this.mutableProperties = Collections.newSetFromMap(new IdentityHashMap<>());
+            this.propertyToMutableIndex = new IdentityHashMap<>();
         }
 
         /**
@@ -93,12 +96,19 @@ public final class PropertyContainer implements IPropertyContainer{
                     , prop);
             properties.put(prop, value);
             propertyByName.put(prop.getName(), prop);
+            //make sure that if we just replaced some mutable property with something immutable, it will no longer be mutable
+            MutableProperty<?> mutable = propertyToMutableIndex.remove(prop);
+            if (mutable!= null)
+                mutableProperties.remove(mutable);
+
             return this;
         }
 
         public <T> Builder putProperty(MutableProperty<T> prop, T value) {
             putProperty(prop.getProperty(), value);
+            //mark it as mutable
             mutableProperties.add(prop);
+            propertyToMutableIndex.put(prop.getProperty(), prop);
             return this;
         }
 
