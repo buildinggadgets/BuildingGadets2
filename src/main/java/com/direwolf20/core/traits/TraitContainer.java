@@ -48,6 +48,12 @@ public final class TraitContainer implements ITraitContainer {
         return Collections.unmodifiableSet(installedUpgrades);
     }
 
+
+    @Override
+    public Set<Trait<?>> listTraits() {
+        return Collections.unmodifiableSet(traits.keySet());
+    }
+
     @Override
     public boolean installUpgrade(TieredUpgrade upgrade) {
         if (installedUpgrades.contains(upgrade.getUpgrade()) || installedTiers.contains(upgrade))
