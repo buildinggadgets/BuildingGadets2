@@ -1,2 +1,2 @@
-# v4
-The not-yet-to-be-offical rewrite of Building Gadgets. 
+# Building Gadgets 2
+It's better in every way, it's also a little shinny 
