@@ -3,8 +3,9 @@ package com.direwolf20.core.traits;
 
 import com.direwolf20.core.DireCore20;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Preconditions;
+import net.minecraft.util.ResourceLocation;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
@@ -14,16 +15,28 @@ import java.util.Objects;
  * @param <T> The type of value represented by the Trait
  */
 public final class Trait<T> {
-    public static final Trait<Boolean> SILK_TOUCH = new Trait<>(Boolean.class, DireCore20.MOD_ID +":silk_touch");
-    public static final Trait<Integer> MAX_POWER = new Trait<>(Integer.class, DireCore20.MOD_ID +":max_power");
-    public static final Trait<Integer> MAX_SIZE = new Trait<>(Integer.class, DireCore20.MOD_ID +":max_size");
-    public static final Trait<Integer> MAX_RANGE = new Trait<>(Integer.class, DireCore20.MOD_ID +":max_range");
-    public static final Trait<Integer> ACTION_COST = new Trait<>(Integer.class, DireCore20.MOD_ID +":action_cost");
-    private final Class<T> type;
-    @Nullable
-    private final String name;
+    public static final Trait<Boolean> SILK_TOUCH = createNamespaced(Boolean.class, DireCore20.MOD_ID , "silk_touch");
+    public static final Trait<Integer> MAX_POWER = createNamespaced(Integer.class, DireCore20.MOD_ID ,"max_power");
+    public static final Trait<Integer> MAX_SIZE = createNamespaced(Integer.class, DireCore20.MOD_ID, "max_size");
+    public static final Trait<Integer> MAX_RANGE = createNamespaced(Integer.class, DireCore20.MOD_ID, "max_range");
+    public static final Trait<Integer> ACTION_COST = createNamespaced(Integer.class, DireCore20.MOD_ID, "action_cost");
+    public static <T> Trait<T> create(Class<T> type, String name) {
+        return new Trait<>(type, name);
+    }
 
-    public Trait(Class<T> type, @Nullable String name) {
+    public static <T> Trait<T> createNamespaced(Class<T> type, String namespace, String path) {
+        return create(type, namespace+":"+path);
+    }
+
+    public static <T> Trait<T> createNamespaced(Class<T> type, ResourceLocation name) {
+        return create(type, name.toString());
+    }
+
+    private final Class<T> type;
+    private final String name;
+    private Trait(Class<T> type, String name) {
+        Preconditions.checkNotNull(name);
+        Preconditions.checkArgument(!name.isEmpty());
         this.type = Objects.requireNonNull(type);
         this.name = name;
     }
@@ -32,7 +45,6 @@ public final class Trait<T> {
         return type.cast(Objects.requireNonNull(v));
     }
 
-    @Nullable
     public String getName() {
         return name;
     }

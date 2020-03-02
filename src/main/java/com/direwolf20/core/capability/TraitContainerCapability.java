@@ -13,7 +13,8 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 
 import javax.annotation.Nullable;
 
-public final class TraitContainerCapability {
+public enum TraitContainerCapability {
+    ;
     @CapabilityInject(ITraitContainer.class)
     public static Capability<ITraitContainer> TRAIT_CONTAINER_CAPABILITY = null;
 
