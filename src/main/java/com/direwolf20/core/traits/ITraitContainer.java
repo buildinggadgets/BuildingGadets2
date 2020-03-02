@@ -31,6 +31,8 @@ public interface ITraitContainer extends INBTSerializable<CompoundNBT> {
 
    Set<TieredUpgrade> listTiers();
 
+   Set<Trait<?>> listTraits();
+
    default Set<Upgrade> listUpgrades() {
       return listTiers().stream().map(TieredUpgrade::getUpgrade).collect(Collectors.toSet());
    }
