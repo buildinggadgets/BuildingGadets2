@@ -12,8 +12,8 @@ import java.util.function.Function;
 
 /**
  * A Property is the key to some mutable and serializable value within an {@link IPropertyContainer}. The value may be retrieved via
- * {@link IPropertyContainer#getProperty(Property)} or set via {@link IPropertyContainer#setProperty(Property, Object)} in a type safe way.
- * The latter is achieved, by casting the results to they type passed into the builder.
+ * {@link IPropertyContainer#getProperty(Property)} or set via {@link IPropertyContainer#setProperty(MutableProperty, Object)} (if a write-access Property
+ * has been obtained) in a type safe way. The latter is achieved, by casting the results to they type passed into the builder.
  * <p>
  * Notice that as of this writing a Property must be capable of serializing and deserializing it's values, as well as having a
  * {@link IPropertyContainer container} wide unique name.
@@ -147,6 +147,25 @@ public final class Property<T> {
 
         public Property<T> build() {
             return new Property<>(type, name, serializer, deserializer);
+        }
+
+        public MutableProperty<T> buildMutable(ResourceLocation resourceLocation) {
+            name(resourceLocation);
+            return buildMutable();
+        }
+
+        public MutableProperty<T> buildMutable(String modid, String path) {
+            name(modid, path);
+            return buildMutable();
+        }
+
+        public MutableProperty<T> buildMutable(String name) {
+            name(name);
+            return buildMutable();
+        }
+
+        public MutableProperty<T> buildMutable() {
+            return new MutableProperty<>(build());
         }
     }
 }

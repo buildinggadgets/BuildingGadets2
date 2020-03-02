@@ -18,10 +18,12 @@ public final class PropertyContainer implements IPropertyContainer{
 
     private final Map<Property<?>, Object> properties;
     private final Map<String, Property<?>> propertyByName;
+    private final Set<MutableProperty<?>> mutableProperties;
 
-    private PropertyContainer(Map<Property<?>, Object> properties, Map<String, Property<?>> propertyByName) {
+    private PropertyContainer(Map<Property<?>, Object> properties, Map<String, Property<?>> propertyByName, Set<MutableProperty<?>> mutableProperties) {
         this.properties = properties;
         this.propertyByName = propertyByName;
+        this.mutableProperties = mutableProperties;
     }
 
     @Override
@@ -31,9 +33,9 @@ public final class PropertyContainer implements IPropertyContainer{
     }
 
     @Override
-    public <T> boolean setProperty(Property<T> property, T value) {
-        if (properties.containsKey(property)) {
-            properties.put(property, value);
+    public <T> boolean setProperty(MutableProperty<T> property, T value) {
+        if (mutableProperties.contains(property)) {
+            properties.put(property.getProperty(), value);
             return true;
         }
         return false;
@@ -69,10 +71,12 @@ public final class PropertyContainer implements IPropertyContainer{
     public static final class Builder {
         private Map<Property<?>, Object> properties;
         private Map<String, Property<?>> propertyByName;
+        private final Set<MutableProperty<?>> mutableProperties;
 
         public Builder() {
             this.properties = new IdentityHashMap<>();
             this.propertyByName = new HashMap<>();
+            this.mutableProperties = Collections.newSetFromMap(new IdentityHashMap<>());
         }
 
         /**
@@ -92,9 +96,15 @@ public final class PropertyContainer implements IPropertyContainer{
             return this;
         }
 
+        public <T> Builder putProperty(MutableProperty<T> prop, T value) {
+            putProperty(prop.getProperty(), value);
+            mutableProperties.add(prop);
+            return this;
+        }
+
         public PropertyContainer build() {
             //do not convert to ImmutableMap here, as string key's are not well-behaved and this would therefore be slower
-            return new PropertyContainer(properties, propertyByName);
+            return new PropertyContainer(properties, propertyByName, mutableProperties);
         }
     }
 }
