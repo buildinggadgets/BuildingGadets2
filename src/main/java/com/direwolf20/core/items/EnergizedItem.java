@@ -11,7 +11,6 @@ import com.direwolf20.core.properties.PropertyContainer;
 import com.direwolf20.core.traits.ITraitContainer;
 import com.direwolf20.core.traits.Trait;
 import com.direwolf20.core.traits.TraitContainer;
-import com.direwolf20.core.util.NBTHelper;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -80,7 +79,7 @@ public abstract class EnergizedItem extends Item {
                 .orElse(Optional.empty());
         if (opt.isPresent()) {
             //make sure not to modify the actual tag
-            CompoundNBT nbt = NBTHelper.getOrCreateTag(stack).copy();
+            CompoundNBT nbt = stack.getOrCreateTag().copy();
             nbt.put(KEY_SYNC, opt.get());
             return nbt;
         }
