@@ -16,7 +16,9 @@ import java.util.Objects;
  */
 public final class Trait<T> {
     public static final Trait<Boolean> SILK_TOUCH = createNamespaced(Boolean.class, DireCore20.MOD_ID , "silk_touch");
-    public static final Trait<Integer> MAX_POWER = createNamespaced(Integer.class, DireCore20.MOD_ID ,"max_power");
+    public static final Trait<Integer> MAX_ENERGY = createNamespaced(Integer.class, DireCore20.MOD_ID ,"max_energy");
+    public static final Trait<Integer> MAX_RECEIVE = createNamespaced(Integer.class, DireCore20.MOD_ID ,"max_receive");
+    public static final Trait<Integer> MAX_EXTRACT = createNamespaced(Integer.class, DireCore20.MOD_ID ,"max_extract");
     public static final Trait<Integer> MAX_SIZE = createNamespaced(Integer.class, DireCore20.MOD_ID, "max_size");
     public static final Trait<Integer> MAX_RANGE = createNamespaced(Integer.class, DireCore20.MOD_ID, "max_range");
     public static final Trait<Integer> ACTION_COST = createNamespaced(Integer.class, DireCore20.MOD_ID, "action_cost");

@@ -32,5 +32,6 @@ public enum TraitContainerCapability {
                 instance.deserializeNBT((CompoundNBT)nbt);
             }
         }, () -> TraitContainer.builder().build());
+        DireCore20.LOG.debug("Registered Trait Container Capability");
     }
 }

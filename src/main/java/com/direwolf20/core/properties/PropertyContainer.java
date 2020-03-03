@@ -92,7 +92,7 @@ public final class PropertyContainer implements IPropertyContainer{
          * @throws IllegalArgumentException if a different Property, with the same name, was already in this Builder. (See the contract of {@link IPropertyContainer}.)
          */
         public <T> Builder putProperty(Property<T> prop, T value) {
-            Preconditions.checkArgument(propertyByName.containsKey(prop.getName()) && propertyByName.get(prop.getName()) != prop,
+            Preconditions.checkArgument(!propertyByName.containsKey(prop.getName()) || propertyByName.get(prop.getName()) == prop,
                     "Caught ambiguous %s during PropertyContainer-Construction. Each Property in the container must have a unique serialisation name! This will not be added to the container!"
                     , prop);
             properties.put(prop, value);

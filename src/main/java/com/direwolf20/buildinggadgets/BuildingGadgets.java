@@ -1,5 +1,6 @@
 package com.direwolf20.buildinggadgets;
 
+import com.direwolf20.buildinggadgets.common.registry.BGItems;
 import com.direwolf20.core.DireCore20;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -24,6 +25,7 @@ public class BuildingGadgets
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::setup);
         bus.addListener(this::clientSetup);
+        BGItems.ITEMS.register(bus);
 
         // Todo: remove once events have their own classes
         MinecraftForge.EVENT_BUS.register(this);
