@@ -29,7 +29,7 @@ public enum TraitContainerCapability {
 
             @Override
             public void readNBT(Capability<ITraitContainer> capability, ITraitContainer instance, Direction side, INBT nbt) {
-                instance.deserializeNBT((CompoundNBT)nbt);
+                instance.deserializeNBT((CompoundNBT) nbt);
             }
         }, () -> TraitContainer.builder().build());
         DireCore20.LOG.debug("Registered Trait Container Capability");

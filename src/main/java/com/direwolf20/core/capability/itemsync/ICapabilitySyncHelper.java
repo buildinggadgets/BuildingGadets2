@@ -10,6 +10,7 @@ public interface ICapabilitySyncHelper {
     default Optional<CompoundNBT> getNBTForSync() {
         return getNBTForSync(true);
     }
+
     @Nonnull
     Optional<CompoundNBT> getNBTForSync(boolean clear);
 

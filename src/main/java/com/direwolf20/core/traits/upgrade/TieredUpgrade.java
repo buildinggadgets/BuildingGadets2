@@ -14,14 +14,22 @@ import java.util.function.UnaryOperator;
 
 /**
  * Data class providing a level to an {@link Upgrade} as well as serialisation Methods.
+ *
  * @see Upgrade
  */
-public final class TieredUpgrade  {
+public final class TieredUpgrade {
     private static final String KEY_UPGRADE_ID = "upgrade";
     private static final String KEY_TIER = "tier";
     @Nonnull
     private final Upgrade upgrade;
     private final int level;
+
+    public TieredUpgrade(Upgrade upgrade, int level) {
+        Preconditions.checkNotNull(upgrade);
+        Preconditions.checkArgument(upgrade.getRegistryName() != null && upgrade.isValidLevel(level), "Cannot have level " + level + " for upgrade " + upgrade.getRegistryName());
+        this.upgrade = upgrade;
+        this.level = level;
+    }
 
     public static TieredUpgrade deserialize(CompoundNBT nbt) {
         int tier = nbt.getInt(KEY_TIER);
@@ -31,13 +39,6 @@ public final class TieredUpgrade  {
         else
             upgrade = Registries.getUpgradeRegistry().getValue(nbt.getInt(KEY_UPGRADE_ID));
         return new TieredUpgrade(upgrade, tier);
-    }
-
-    public TieredUpgrade(Upgrade upgrade, int level) {
-        Preconditions.checkNotNull(upgrade);
-        Preconditions.checkArgument(upgrade.getRegistryName()!=null && upgrade.isValidLevel(level), "Cannot have level "+ level +" for upgrade "+upgrade.getRegistryName());
-        this.upgrade = upgrade;
-        this.level = level;
     }
 
     @Nonnull
@@ -63,7 +64,7 @@ public final class TieredUpgrade  {
 
     public CompoundNBT serializeNBT(boolean persistent) {
         CompoundNBT compound = new CompoundNBT();
-        assert getUpgrade().getRegistryName()!=null;
+        assert getUpgrade().getRegistryName() != null;
         if (persistent)
             compound.putString(KEY_UPGRADE_ID, getUpgrade().getRegistryName().toString());
         else
@@ -75,7 +76,7 @@ public final class TieredUpgrade  {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (! (o instanceof TieredUpgrade)) return false;
+        if (!(o instanceof TieredUpgrade)) return false;
 
         final TieredUpgrade that = (TieredUpgrade) o;
 

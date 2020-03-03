@@ -23,7 +23,7 @@ public final class PropertyTraitBackedEnergyStorage implements IEnergyStorage {
         maxReceive = MathHelper.clamp(maxReceive, 0, getMaxReceive());
         int energy = getEnergyStored();
         int maxEnergy = getMaxEnergyStored();
-        int newEnergy = Math.min(energy+maxReceive, maxEnergy);
+        int newEnergy = Math.min(energy + maxReceive, maxEnergy);
 
         if (!simulate)
             propertyContainer.setProperty(energyProp, newEnergy);
@@ -35,7 +35,7 @@ public final class PropertyTraitBackedEnergyStorage implements IEnergyStorage {
     public int extractEnergy(int maxExtract, boolean simulate) {
         maxExtract = MathHelper.clamp(maxExtract, 0, getMaxExtract());
         int energy = getEnergyStored();
-        int newEnergy = Math.max(energy-maxExtract, 0);
+        int newEnergy = Math.max(energy - maxExtract, 0);
 
         if (!simulate)
             propertyContainer.setProperty(energyProp, newEnergy);

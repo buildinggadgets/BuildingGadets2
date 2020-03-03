@@ -9,6 +9,7 @@ import java.util.function.UnaryOperator;
 
 /**
  * Utility class for managing the value represented by a {@link Trait} in some {@link ITraitContainer}.
+ *
  * @param <T> The type of value
  */
 final class TraitValue<T> {
@@ -22,7 +23,7 @@ final class TraitValue<T> {
 
     T getValue() {
         T base = defaultValue.get();
-        for (UnaryOperator<T> op: modificators.values())
+        for (UnaryOperator<T> op : modificators.values())
             base = op.apply(base);
         return base;
     }
@@ -35,7 +36,7 @@ final class TraitValue<T> {
     }
 
     boolean removeModificator(TieredUpgrade upgrade) {
-        return modificators.remove(upgrade)!=null;
+        return modificators.remove(upgrade) != null;
     }
 
     void clearModificators() {

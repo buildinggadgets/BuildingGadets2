@@ -14,21 +14,22 @@ import java.util.function.UnaryOperator;
  * a {@link Range} object.
  */
 public final class UpgradeBuilder {
-    public static UpgradeBuilder create() {
-        return new UpgradeBuilder();
-    }
-
     private final ImmutableMap.Builder<Trait<?>, Function<TieredUpgrade, UnaryOperator<?>>> modifications;
 
     private UpgradeBuilder() {
         modifications = ImmutableMap.builder();
     }
 
+    public static UpgradeBuilder create() {
+        return new UpgradeBuilder();
+    }
+
     /**
      * All other modification adding functions delegate through to this Method!
-     * @param trait The trait to add or replace
+     *
+     * @param trait   The trait to add or replace
      * @param factory Factory function, for mapping a {@link TieredUpgrade} to a corresponding operator
-     * @param <T> The value type
+     * @param <T>     The value type
      * @return The builder instance
      * @throws NullPointerException if either trait or factory are null
      */
@@ -65,7 +66,7 @@ public final class UpgradeBuilder {
         return new BuiltUpgrade(modifications.build(), Objects.requireNonNull(validTiers));
     }
 
-    private static final class BuiltUpgrade extends Upgrade{
+    private static final class BuiltUpgrade extends Upgrade {
         private final ImmutableMap<Trait<?>, Function<TieredUpgrade, UnaryOperator<?>>> modifications;
         private final Range<Integer> validTiers;
 
@@ -84,7 +85,7 @@ public final class UpgradeBuilder {
         @SuppressWarnings("unchecked") //This is a safe cast, as only type safe operators have been added to the map
         public <T> UnaryOperator<T> getModificatorFor(Trait<T> trait, TieredUpgrade tier) {
             Function<TieredUpgrade, UnaryOperator<?>> factory = modifications.get(trait); //Kotlin, where are you, when one needs you... :(
-            return factory!=null? (UnaryOperator<T>) factory.apply(tier) : null;
+            return factory != null ? (UnaryOperator<T>) factory.apply(tier) : null;
         }
     }
 }

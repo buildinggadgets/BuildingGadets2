@@ -29,7 +29,7 @@ public enum PropertyContainerCapability {
 
             @Override
             public void readNBT(Capability<IPropertyContainer> capability, IPropertyContainer instance, Direction side, INBT nbt) {
-                instance.deserializeNBT((CompoundNBT)nbt);
+                instance.deserializeNBT((CompoundNBT) nbt);
             }
         }, () -> PropertyContainer.builder().build());
         DireCore20.LOG.debug("Registered Property Container Capability");

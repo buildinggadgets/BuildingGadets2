@@ -30,8 +30,9 @@ import java.util.Optional;
 import java.util.Set;
 
 public abstract class EnergizedItem extends Item {
-    private static final String KEY_SYNC = "cap_sync";
     protected static final MutableProperty<Integer> ENERGY = Property.intBuilder().buildMutable("energy");
+    private static final String KEY_SYNC = "cap_sync";
+
     public EnergizedItem(Properties properties) {
         super(properties);
     }
@@ -43,7 +44,7 @@ public abstract class EnergizedItem extends Item {
         ITraitContainer traitContainer = onAttachTraits(TraitContainer.builder()).build();
         IPropertyContainer propertyContainer = onAttachProperties(PropertyContainer.builder(), mutableProps).build();
         ICapabilityProvider provider = createCapabilities(stack, traitContainer, propertyContainer, mutableProps.build());
-        if (nbt!=null)
+        if (nbt != null)
             ((INBTSerializable<CompoundNBT>) provider).deserializeNBT(nbt);
 
         return provider;
@@ -122,6 +123,7 @@ public abstract class EnergizedItem extends Item {
     protected static class EnergyCapabilityProvider extends PropertyTraitCapabilityProvider {
         private final IEnergyStorage energyStorage;
         private final LazyOptional<IEnergyStorage> energyStorageOpt;
+
         public EnergyCapabilityProvider(ITraitContainer traitContainer, IPropertyContainer propertyContainer, Set<MutableProperty<?>> mutableProperties) {
             super(traitContainer, propertyContainer, mutableProperties);
             energyStorage = new PropertyTraitBackedEnergyStorage(propertyContainer, traitContainer, ENERGY);

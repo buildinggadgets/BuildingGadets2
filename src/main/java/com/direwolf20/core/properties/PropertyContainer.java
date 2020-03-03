@@ -8,10 +8,15 @@ import java.util.*;
 /**
  * The default {@link IPropertyContainer} which is created using a {@link Builder} to add the {@link Property Properties}
  * represented by this container.
+ *
  * @see IPropertyContainer
  * @see Property
  */
-public final class PropertyContainer implements IPropertyContainer{
+public final class PropertyContainer implements IPropertyContainer {
+    private final Map<Property<?>, Object> properties;
+    private final Map<String, Property<?>> propertyByName;
+    private final Set<MutableProperty<?>> mutableProperties;
+    
     private PropertyContainer(Map<Property<?>, Object> properties, Map<String, Property<?>> propertyByName, Set<MutableProperty<?>> mutableProperties) {
         this.properties = properties;
         this.propertyByName = propertyByName;
@@ -21,11 +26,6 @@ public final class PropertyContainer implements IPropertyContainer{
     public static Builder builder() {
         return new Builder();
     }
-
-    private final Map<Property<?>, Object> properties;
-    private final Map<String, Property<?>> propertyByName;
-    private final Set<MutableProperty<?>> mutableProperties;
-
 
     @Override
     public <T> Optional<T> getProperty(Property<T> property) {
@@ -85,9 +85,10 @@ public final class PropertyContainer implements IPropertyContainer{
 
         /**
          * Sets the given Property to the given value / adds it with the given default, if not present.
-         * @param prop The Property to set/add
+         *
+         * @param prop  The Property to set/add
          * @param value The value to set it to
-         * @param <T> The type of the value
+         * @param <T>   The type of the value
          * @return The Builder instance
          * @throws IllegalArgumentException if a different Property, with the same name, was already in this Builder. (See the contract of {@link IPropertyContainer}.)
          */
@@ -99,7 +100,7 @@ public final class PropertyContainer implements IPropertyContainer{
             propertyByName.put(prop.getName(), prop);
             //make sure that if we just replaced some mutable property with something immutable, it will no longer be mutable
             MutableProperty<?> mutable = propertyToMutableIndex.remove(prop);
-            if (mutable!= null)
+            if (mutable != null)
                 mutableProperties.remove(mutable);
 
             return this;

@@ -33,10 +33,11 @@ public final class CapabilityModificationSyncHelper implements ICapabilitySyncHe
 
     @Override
     public void readNBTFromSync(CompoundNBT nbt) {
-        for (String s:nbt.keySet()) {
-            objectKeyMap.getOrDefault(s, n -> {}).accept((ListNBT) nbt.get(s));
+        for (String s : nbt.keySet()) {
+            objectKeyMap.getOrDefault(s, n -> {
+            }).accept((ListNBT) nbt.get(s));
         }
-        if (nbtForSync!= null) //we are on the client and just received syncs... This class is not intended for bidirectional syncing
+        if (nbtForSync != null) //we are on the client and just received syncs... This class is not intended for bidirectional syncing
             nbtForSync = null;
     }
 
@@ -51,8 +52,8 @@ public final class CapabilityModificationSyncHelper implements ICapabilitySyncHe
         if (!nbtForSync.contains(key, NBT.TAG_LIST))
             nbtForSync.put(key, new ListNBT());
 
-        ListNBT list = (ListNBT)nbtForSync.get(key);
-        assert list!=null;
+        ListNBT list = (ListNBT) nbtForSync.get(key);
+        assert list != null;
         list.add(value);
     }
 }

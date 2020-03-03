@@ -15,20 +15,19 @@ import java.util.function.Supplier;
  * the {@link Trait Trait's} which are available from this container.
  */
 public final class TraitContainer implements ITraitContainer {
-    public static Builder builder() {
-        return new Builder();
-    }
-
     private static final String KEY_INSTALLED_UPGRADES = "installed_upgrades";
     private Map<Trait<?>, TraitValue<?>> traits;
     //for ease of lookup
     private Set<Upgrade> installedUpgrades;
     private Set<TieredUpgrade> installedTiers;
-
     private TraitContainer(Map<Trait<?>, TraitValue<?>> traits) {
         this.traits = traits;
         this.installedTiers = new LinkedHashSet<>();
         this.installedUpgrades = new HashSet<>();
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     @Override
@@ -58,7 +57,7 @@ public final class TraitContainer implements ITraitContainer {
     public boolean installUpgrade(TieredUpgrade upgrade) {
         if (installedUpgrades.contains(upgrade.getUpgrade()) || installedTiers.contains(upgrade))
             return false;
-        if (! traits.keySet().containsAll(upgrade.getAppliedModifications()))
+        if (!traits.keySet().containsAll(upgrade.getAppliedModifications()))
             return false;
         for (Trait<?> characteristic : upgrade.getAppliedModifications()) {
             if (!applyModificator(characteristic, traits.get(characteristic), upgrade))
@@ -69,7 +68,7 @@ public final class TraitContainer implements ITraitContainer {
 
     @SuppressWarnings("unchecked")
     private <T> boolean applyModificator(Trait<T> characteristic, TraitValue<?> value, TieredUpgrade upgrade) {
-        return ((TraitValue<T>)value).addModificator(upgrade, upgrade.getModificatorFor(characteristic));
+        return ((TraitValue<T>) value).addModificator(upgrade, upgrade.getModificatorFor(characteristic));
     }
 
     @Override
@@ -87,7 +86,7 @@ public final class TraitContainer implements ITraitContainer {
     public CompoundNBT serializeNBT() {
         CompoundNBT compound = new CompoundNBT();
         ListNBT installedUpgrades = new ListNBT();
-        for (TieredUpgrade upgrade:installedTiers)
+        for (TieredUpgrade upgrade : installedTiers)
             installedUpgrades.add(upgrade.serializeNBT());
         compound.put(KEY_INSTALLED_UPGRADES, installedUpgrades);
         return compound;
@@ -98,12 +97,12 @@ public final class TraitContainer implements ITraitContainer {
         if (!nbt.contains(KEY_INSTALLED_UPGRADES, NBT.TAG_LIST))
             return;
         ListNBT list = (ListNBT) nbt.get(KEY_INSTALLED_UPGRADES);
-        assert list!=null;
+        assert list != null;
         installedUpgrades.clear();
         installedTiers.clear();
-        for (TraitValue<?> val:traits.values())
+        for (TraitValue<?> val : traits.values())
             val.clearModificators();
-        for (INBT serializedTier: list) {
+        for (INBT serializedTier : list) {
             TieredUpgrade upgrade = TieredUpgrade.deserialize((CompoundNBT) serializedTier);
             installUpgrade(upgrade);
         }
@@ -125,9 +124,10 @@ public final class TraitContainer implements ITraitContainer {
 
         /**
          * Add/Replace a trait in this builder.
-         * @param trait The {@link Trait} to add or replace
+         *
+         * @param trait           The {@link Trait} to add or replace
          * @param defaultSupplier The default value supplier for the trait
-         * @param <T> The type of the trait and it's corresponding values
+         * @param <T>             The type of the trait and it's corresponding values
          * @return The builder instance
          * @throws NullPointerException if trait or defaultSupplier are null
          */

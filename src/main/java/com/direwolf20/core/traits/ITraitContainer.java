@@ -27,17 +27,17 @@ import java.util.stream.Collectors;
  * Serialisation will only serialize and deserialize the installed upgrades. Traits will not be affected (as they aren't even serializable).
  */
 public interface ITraitContainer extends INBTSerializable<CompoundNBT> {
-   <T> Optional<T> getTrait(Trait<T> trait);
+    <T> Optional<T> getTrait(Trait<T> trait);
 
-   Set<TieredUpgrade> listTiers();
+    Set<TieredUpgrade> listTiers();
 
-   Set<Trait<?>> listTraits();
+    Set<Trait<?>> listTraits();
 
-   default Set<Upgrade> listUpgrades() {
-      return listTiers().stream().map(TieredUpgrade::getUpgrade).collect(Collectors.toSet());
-   }
+    default Set<Upgrade> listUpgrades() {
+        return listTiers().stream().map(TieredUpgrade::getUpgrade).collect(Collectors.toSet());
+    }
 
-   boolean installUpgrade(TieredUpgrade upgrade);
+    boolean installUpgrade(TieredUpgrade upgrade);
 
-   boolean removeUpgrade(TieredUpgrade upgrade);
+    boolean removeUpgrade(TieredUpgrade upgrade);
 }

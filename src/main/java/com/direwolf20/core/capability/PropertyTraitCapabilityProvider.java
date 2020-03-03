@@ -29,6 +29,15 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class PropertyTraitCapabilityProvider implements ICapabilityProvider, INBTSerializable<CompoundNBT> {
+    private static final String KEY_TRAITS = "traits";
+    private static final String KEY_PROPERTIES = "properties";
+    private final ModificationSyncTraitContainer traitContainer;
+    private final ModificationSyncPropertyContainer propertyContainer;
+    private final CapabilityModificationSyncHelper syncHelper;
+    private final LazyOptional<ITraitContainer> traitContainerOpt;
+    private final LazyOptional<IPropertyContainer> propertyContainerOpt;
+    private final LazyOptional<ICapabilitySyncHelper> syncHelperOpt;
+
     public PropertyTraitCapabilityProvider(ITraitContainer traitContainer, IPropertyContainer propertyContainer, Set<MutableProperty<?>> mutableProperties) {
         this.syncHelper = new CapabilityModificationSyncHelper();
         this.syncHelperOpt = LazyOptional.of(this::getSyncHelper);
@@ -39,16 +48,6 @@ public class PropertyTraitCapabilityProvider implements ICapabilityProvider, INB
         syncHelper.registerSyncConsumer(KEY_TRAITS, this.traitContainer);
         syncHelper.registerSyncConsumer(KEY_PROPERTIES, this.propertyContainer);
     }
-    private static final String KEY_TRAITS = "traits";
-    private static final String KEY_PROPERTIES = "properties";
-
-    private final ModificationSyncTraitContainer traitContainer;
-    private final ModificationSyncPropertyContainer propertyContainer;
-    private final CapabilityModificationSyncHelper syncHelper;
-
-    private final LazyOptional<ITraitContainer> traitContainerOpt;
-    private final LazyOptional<IPropertyContainer> propertyContainerOpt;
-    private final LazyOptional<ICapabilitySyncHelper> syncHelperOpt;
 
     @Nonnull
     public ITraitContainer getTraitContainer() {
@@ -159,7 +158,7 @@ public class PropertyTraitCapabilityProvider implements ICapabilityProvider, INB
 
         @Override
         public void accept(ListNBT list) {
-            for (INBT nbt :list) {
+            for (INBT nbt : list) {
                 CompoundNBT compound = (CompoundNBT) nbt;
                 boolean isInstall = compound.getBoolean(KEY_IS_INSTALL);
                 TieredUpgrade upgrade = TieredUpgrade.deserialize(compound.getCompound(KEY_UPGRADE));
@@ -224,11 +223,11 @@ public class PropertyTraitCapabilityProvider implements ICapabilityProvider, INB
         //called when a sync is received
         @Override
         public void accept(ListNBT list) {
-            for (INBT nbt :list) {
+            for (INBT nbt : list) {
                 CompoundNBT compound = (CompoundNBT) nbt;
 
                 @SuppressWarnings("unchecked") //we will only pass the correct objects, created by the Prop itself to the delegate => safe
-                MutableProperty<Object> property = (MutableProperty<Object>) nameToProperty.get(compound.getString(KEY_PROP));
+                        MutableProperty<Object> property = (MutableProperty<Object>) nameToProperty.get(compound.getString(KEY_PROP));
                 if (property == null) {
                     DireCore20.LOG.error("Attempted to handle sync from unkown Property with name {}, but this does not seem to be known!", compound.getString(KEY_PROP));
                     continue;
