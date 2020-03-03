@@ -21,6 +21,13 @@ import java.util.function.Function;
  * @param <T> The type of the values represented by this Property
  */
 public final class Property<T> {
+    private Property(Class<T> type, String name, Function<T, INBT> serializer, Function<INBT, T> deserializer) {
+        this.type = Objects.requireNonNull(type, "Cannot have a property without a type!");
+        this.name = Objects.requireNonNull(name, "Cannot have a property without a name!");
+        this.serializer = Objects.requireNonNull(serializer, "Cannot have a property without a serializer!");
+        this.deserializer = Objects.requireNonNull(deserializer, "Cannot have a property without a deserializer!");
+    }
+
     /**
      *
      * @param type The class of the values represented by the resulting {@link Property}
@@ -56,13 +63,6 @@ public final class Property<T> {
     private final String name;
     private final Function<T, INBT> serializer;
     private final Function<INBT, T> deserializer;
-
-    private Property(Class<T> type, String name, Function<T, INBT> serializer, Function<INBT, T> deserializer) {
-        this.type = Objects.requireNonNull(type, "Cannot have a property without a type!");
-        this.name = Objects.requireNonNull(name, "Cannot have a property without a name!");
-        this.serializer = Objects.requireNonNull(serializer, "Cannot have a property without a serializer!");
-        this.deserializer = Objects.requireNonNull(deserializer, "Cannot have a property without a deserializer!");
-    }
 
     T cast(Object value) {
         return type.cast(Objects.requireNonNull(value));

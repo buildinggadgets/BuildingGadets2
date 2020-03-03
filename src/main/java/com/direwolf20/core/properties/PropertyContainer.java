@@ -12,6 +12,12 @@ import java.util.*;
  * @see Property
  */
 public final class PropertyContainer implements IPropertyContainer{
+    private PropertyContainer(Map<Property<?>, Object> properties, Map<String, Property<?>> propertyByName, Set<MutableProperty<?>> mutableProperties) {
+        this.properties = properties;
+        this.propertyByName = propertyByName;
+        this.mutableProperties = mutableProperties;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -20,11 +26,6 @@ public final class PropertyContainer implements IPropertyContainer{
     private final Map<String, Property<?>> propertyByName;
     private final Set<MutableProperty<?>> mutableProperties;
 
-    private PropertyContainer(Map<Property<?>, Object> properties, Map<String, Property<?>> propertyByName, Set<MutableProperty<?>> mutableProperties) {
-        this.properties = properties;
-        this.propertyByName = propertyByName;
-        this.mutableProperties = mutableProperties;
-    }
 
     @Override
     public <T> Optional<T> getProperty(Property<T> property) {
