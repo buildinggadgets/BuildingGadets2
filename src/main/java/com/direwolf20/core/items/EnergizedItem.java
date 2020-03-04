@@ -92,11 +92,17 @@ public abstract class EnergizedItem extends Item {
         if (nbt != null) {
             if (nbt.contains(KEY_PROPERTIES, NBT.TAG_COMPOUND))
                 stack.getCapability(PropertyContainerCapability.PROPERTY_CONTAINER_CAPABILITY)
-                        .ifPresent(container -> container.deserializeNBT(nbt.getCompound(KEY_PROPERTIES)));
+                        .ifPresent(container ->  {
+                            container.deserializeNBT(nbt.getCompound(KEY_PROPERTIES));
+                            nbt.remove(KEY_PROPERTIES);
+                        });
 
             if (nbt.contains(KEY_TRAITS, NBT.TAG_COMPOUND))
                 stack.getCapability(TraitContainerCapability.TRAIT_CONTAINER_CAPABILITY)
-                        .ifPresent(container -> container.deserializeNBT(nbt.getCompound(KEY_TRAITS)));
+                        .ifPresent(container ->  {
+                            container.deserializeNBT(nbt.getCompound(KEY_TRAITS));
+                            nbt.remove(KEY_TRAITS);
+                        });
 
             if (nbt.contains(TraitEnergyStorage.KEY_ENERGY, NBT.TAG_COMPOUND))
                 stack.getCapability(CapabilityEnergy.ENERGY)
@@ -104,6 +110,7 @@ public abstract class EnergizedItem extends Item {
                             @SuppressWarnings("unchecked") //we know the implementation class
                             INBTSerializable<CompoundNBT> serializable = (INBTSerializable<CompoundNBT>) energyStorage;
                             serializable.deserializeNBT(nbt.getCompound(TraitEnergyStorage.KEY_ENERGY));
+                            nbt.remove(TraitEnergyStorage.KEY_ENERGY);
                         });
         }
         stack.setTag(nbt);
