@@ -16,6 +16,17 @@ import net.minecraftforge.common.util.LazyOptional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+/**
+ * An intentionally subclassable {@link ICapabilityProvider} implementation which gives access to both an {@link ITraitContainer}
+ * and an {@link IPropertyContainer}. This Provider is intended to be used with an {@link ItemStack} and will update a
+ * {@link #KEY_CHANGE_COUNT change count} property on the stack's {@link ItemStack#getTag() NBT-Tag}, every time a
+ * {@link com.direwolf20.core.properties.Property Property} is modified or an {@link com.direwolf20.core.traits.upgrade.TieredUpgrade Upgrade}
+ * is installed. As a result it is possible to implement syncing by reading and writing the nbt data of both caps to
+ * the {@link net.minecraft.item.Item#getShareTag(ItemStack) ItemStacks Share Tag}.
+ * <p>
+ * Notice that this {@link ICapabilityProvider} implements {@link INBTSerializable} and therefore enables the resulting caps to
+ * be saved to the regular cap storage.
+ */
 public class PropertyTraitCapabilityProvider implements ICapabilityProvider, INBTSerializable<CompoundNBT> {
     private static final String KEY_CHANGE_COUNT = "change_count";
     private static final String KEY_TRAITS = "traits";
