@@ -85,6 +85,7 @@ public final class TraitEnergyStorage implements IEnergyStorage, INBTSerializabl
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putInt(KEY_ENERGY, energyStored);
+
         return nbt;
     }
 

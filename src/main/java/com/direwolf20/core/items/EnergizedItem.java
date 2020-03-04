@@ -5,8 +5,6 @@ import com.direwolf20.core.capability.PropertyTraitCapabilityProvider;
 import com.direwolf20.core.capability.TraitContainerCapability;
 import com.direwolf20.core.capability.TraitEnergyStorage;
 import com.direwolf20.core.properties.IPropertyContainer;
-import com.direwolf20.core.properties.MutableProperty;
-import com.direwolf20.core.properties.Property;
 import com.direwolf20.core.properties.PropertyContainer;
 import com.direwolf20.core.traits.ITraitContainer;
 import com.direwolf20.core.traits.Trait;
@@ -27,8 +25,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public abstract class EnergizedItem extends Item {
-    protected static final MutableProperty<Integer> ENERGY = Property.intBuilder().buildMutable("energy");
-    private static final String KEY_SYNC = "cap_sync";
     private static final String KEY_PROPERTIES = "properties";
     private static final String KEY_TRAITS = "traits";
 
@@ -42,6 +38,7 @@ public abstract class EnergizedItem extends Item {
         ITraitContainer traitContainer = onAttachTraits(TraitContainer.builder()).build();
         IPropertyContainer propertyContainer = onAttachProperties(PropertyContainer.builder()).build();
         ICapabilityProvider provider = createCapabilities(stack, traitContainer, propertyContainer);
+
         if (nbt != null)
             ((INBTSerializable<CompoundNBT>) provider).deserializeNBT(nbt);
 
@@ -73,16 +70,20 @@ public abstract class EnergizedItem extends Item {
     @Override
     public CompoundNBT getShareTag(ItemStack stack) {
         CompoundNBT nbt = stack.getOrCreateTag().copy();
+
         stack.getCapability(PropertyContainerCapability.PROPERTY_CONTAINER_CAPABILITY)
                 .ifPresent(container -> nbt.put(KEY_PROPERTIES, container.serializeNBT()));
+
         stack.getCapability(TraitContainerCapability.TRAIT_CONTAINER_CAPABILITY)
                 .ifPresent(container -> nbt.put(KEY_TRAITS, container.serializeNBT(false)));
+
         stack.getCapability(CapabilityEnergy.ENERGY)
                 .ifPresent(energyStorage -> {
                     @SuppressWarnings("unchecked") //we know the implementation class
                     INBTSerializable<CompoundNBT> serializable = (INBTSerializable<CompoundNBT>) energyStorage;
                     nbt.put(TraitEnergyStorage.KEY_ENERGY, serializable.serializeNBT());
                 });
+
         return nbt;
     }
 
@@ -92,9 +93,11 @@ public abstract class EnergizedItem extends Item {
             if (nbt.contains(KEY_PROPERTIES, NBT.TAG_COMPOUND))
                 stack.getCapability(PropertyContainerCapability.PROPERTY_CONTAINER_CAPABILITY)
                         .ifPresent(container -> container.deserializeNBT(nbt.getCompound(KEY_PROPERTIES)));
+
             if (nbt.contains(KEY_TRAITS, NBT.TAG_COMPOUND))
                 stack.getCapability(TraitContainerCapability.TRAIT_CONTAINER_CAPABILITY)
                         .ifPresent(container -> container.deserializeNBT(nbt.getCompound(KEY_TRAITS)));
+
             if (nbt.contains(TraitEnergyStorage.KEY_ENERGY, NBT.TAG_COMPOUND))
                 stack.getCapability(CapabilityEnergy.ENERGY)
                         .ifPresent(energyStorage -> {
@@ -155,12 +158,14 @@ public abstract class EnergizedItem extends Item {
         public CompoundNBT serializeNBT() {
             CompoundNBT nbt = super.serializeNBT();
             nbt.put(TraitEnergyStorage.KEY_ENERGY, getEnergyStorage().serializeNBT());
+
             return nbt;
         }
 
         @Override
         public void deserializeNBT(CompoundNBT nbt) {
             super.deserializeNBT(nbt);
+
             if (nbt.contains(TraitEnergyStorage.KEY_ENERGY, NBT.TAG_COMPOUND))
                 getEnergyStorage().deserializeNBT(nbt.getCompound(TraitEnergyStorage.KEY_ENERGY));
         }
