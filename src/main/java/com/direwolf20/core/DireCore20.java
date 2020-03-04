@@ -1,7 +1,6 @@
 package com.direwolf20.core;
 
 import com.direwolf20.core.capability.PropertyContainerCapability;
-import com.direwolf20.core.capability.SyncHelperCapability;
 import com.direwolf20.core.capability.TraitContainerCapability;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -22,6 +21,5 @@ public final class DireCore20 {
     private void setup(final FMLCommonSetupEvent event) {
         TraitContainerCapability.register();
         PropertyContainerCapability.register();
-        SyncHelperCapability.register();
     }
 }

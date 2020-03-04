@@ -40,4 +40,11 @@ public interface ITraitContainer extends INBTSerializable<CompoundNBT> {
     boolean installUpgrade(TieredUpgrade upgrade);
 
     boolean removeUpgrade(TieredUpgrade upgrade);
+
+    CompoundNBT serializeNBT(boolean persistend);
+
+    @Override
+    default CompoundNBT serializeNBT() {
+        return serializeNBT(true);
+    }
 }

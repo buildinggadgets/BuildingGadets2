@@ -83,11 +83,11 @@ public final class TraitContainer implements ITraitContainer {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
+    public CompoundNBT serializeNBT(boolean persistent) {
         CompoundNBT compound = new CompoundNBT();
         ListNBT installedUpgrades = new ListNBT();
         for (TieredUpgrade upgrade : installedTiers)
-            installedUpgrades.add(upgrade.serializeNBT());
+            installedUpgrades.add(upgrade.serializeNBT(persistent));
         compound.put(KEY_INSTALLED_UPGRADES, installedUpgrades);
         return compound;
     }

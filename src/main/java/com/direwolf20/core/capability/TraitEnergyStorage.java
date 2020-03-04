@@ -1,21 +1,27 @@
 package com.direwolf20.core.capability;
 
-import com.direwolf20.core.properties.IPropertyContainer;
-import com.direwolf20.core.properties.MutableProperty;
 import com.direwolf20.core.traits.ITraitContainer;
 import com.direwolf20.core.traits.Trait;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.common.util.Constants.NBT;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.energy.IEnergyStorage;
 
-public final class PropertyTraitBackedEnergyStorage implements IEnergyStorage {
-    private final IPropertyContainer propertyContainer;
+public final class TraitEnergyStorage implements IEnergyStorage, INBTSerializable<CompoundNBT> {
+    public static final String KEY_ENERGY = "energy";
     private final ITraitContainer traitContainer;
-    private final MutableProperty<Integer> energyProp;
+    private int energyStored;
+    private final Runnable onChangeCallback;
 
-    public PropertyTraitBackedEnergyStorage(IPropertyContainer propertyContainer, ITraitContainer traitContainer, MutableProperty<Integer> energyProp) {
-        this.propertyContainer = propertyContainer;
+    public TraitEnergyStorage(ITraitContainer traitContainer, Runnable onChangeCallback) {
         this.traitContainer = traitContainer;
-        this.energyProp = energyProp;
+        this.energyStored = 0;
+        this.onChangeCallback = onChangeCallback;
+    }
+
+    public TraitEnergyStorage(ITraitContainer traitContainer) {
+        this(traitContainer, () -> {});
     }
 
     @Override
@@ -25,8 +31,10 @@ public final class PropertyTraitBackedEnergyStorage implements IEnergyStorage {
         int maxEnergy = getMaxEnergyStored();
         int newEnergy = Math.min(energy + maxReceive, maxEnergy);
 
-        if (!simulate)
-            propertyContainer.setProperty(energyProp, newEnergy);
+        if (!simulate) {
+            energyStored = newEnergy;
+            onChangeCallback.run();
+        }
 
         return newEnergy - energy;
     }
@@ -37,15 +45,17 @@ public final class PropertyTraitBackedEnergyStorage implements IEnergyStorage {
         int energy = getEnergyStored();
         int newEnergy = Math.max(energy - maxExtract, 0);
 
-        if (!simulate)
-            propertyContainer.setProperty(energyProp, newEnergy);
+        if (!simulate) {
+            energyStored = newEnergy;
+            onChangeCallback.run();
+        }
 
         return newEnergy - energy;
     }
 
     @Override
     public int getEnergyStored() {
-        return propertyContainer.getProperty(energyProp).get();
+        return energyStored;
     }
 
     @Override
@@ -69,5 +79,18 @@ public final class PropertyTraitBackedEnergyStorage implements IEnergyStorage {
     @Override
     public boolean canReceive() {
         return getMaxReceive() > 0;
+    }
+
+    @Override
+    public CompoundNBT serializeNBT() {
+        CompoundNBT nbt = new CompoundNBT();
+        nbt.putInt(KEY_ENERGY, energyStored);
+        return nbt;
+    }
+
+    @Override
+    public void deserializeNBT(CompoundNBT nbt) {
+        if (nbt.contains(KEY_ENERGY, NBT.TAG_INT))
+            energyStored = nbt.getInt(KEY_ENERGY);
     }
 }
