@@ -25,12 +25,12 @@ import net.minecraftforge.energy.IEnergyStorage;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public abstract class EnergizedItem extends Item {
+public abstract class EnergizedGadget extends Item {
     private static final String KEY_ENERGY = "energy";
     private static final String KEY_PROPERTIES = "properties";
     private static final String KEY_TRAITS = "traits";
 
-    public EnergizedItem(Properties properties) {
+    public EnergizedGadget(Properties properties) {
         super(properties);
     }
 

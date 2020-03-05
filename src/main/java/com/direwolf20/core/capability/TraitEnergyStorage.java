@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  * A serializable {@link IEnergyStorage} implementation which pulls the values for {@link #getMaxEnergyStored()}, {@link #getMaxReceive()}
  * and {@link #getMaxExtract()} from an {@link ITraitContainer}. The Traits used for this may be defined via the provided
  * {@link #builder(ITraitContainer) builder}.Otherwise they'll default to {@link Trait#MAX_ENERGY}, {@link Trait#MAX_RECEIVE} and
- * {@link Trait#MAX_EXTRACT}.
+ * {@link Trait#MAX_EXTRACT}. If a Trait is not present in the container, the represented value will default to 0.
  * <p>
  * This class implements {@link INBTSerializable<INBT>}, even though it only ever serializes {@link IntNBT} instances. This is to avoid future
  * breaking changes if we happen to change the nbt format.
@@ -66,11 +66,11 @@ public final class TraitEnergyStorage implements IEnergyStorage, INBTSerializabl
     }
 
     public int getMaxExtract() {
-        return traitContainer.getTrait(maxExtract).get();
+        return traitContainer.getTrait(maxExtract).orElse(0);
     }
 
     public int getMaxReceive() {
-        return traitContainer.getTrait(maxReceive).get();
+        return traitContainer.getTrait(maxReceive).orElse(0);
     }
 
     @Override
@@ -103,7 +103,7 @@ public final class TraitEnergyStorage implements IEnergyStorage, INBTSerializabl
 
     @Override
     public int getMaxEnergyStored() {
-        return traitContainer.getTrait(maxEnergyStored).get();
+        return traitContainer.getTrait(maxEnergyStored).orElse(0);
     }
 
     @Override
@@ -171,17 +171,17 @@ public final class TraitEnergyStorage implements IEnergyStorage, INBTSerializabl
         }
 
         public Builder maxEnergy(Trait<Integer> maxEnergy) {
-            this.maxEnergy = Objects.requireNonNull(maxEnergy);
+            this.maxEnergy = maxEnergy;
             return this;
         }
 
         public Builder maxReceive(Trait<Integer> maxReceive) {
-            this.maxReceive = Objects.requireNonNull(maxReceive);
+            this.maxReceive = maxReceive;
             return this;
         }
 
         public Builder maxExtract(Trait<Integer> maxExtract) {
-            this.maxExtract = Objects.requireNonNull(maxExtract);
+            this.maxExtract = maxExtract;
             return this;
         }
 

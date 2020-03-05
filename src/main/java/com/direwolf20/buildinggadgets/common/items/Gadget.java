@@ -1,7 +1,7 @@
 package com.direwolf20.buildinggadgets.common.items;
 
 import com.direwolf20.buildinggadgets.common.registry.BGItems;
-import com.direwolf20.core.items.EnergizedItem;
+import com.direwolf20.core.items.EnergizedGadget;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -16,7 +16,7 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public abstract class Gadget extends EnergizedItem {
+public abstract class Gadget extends EnergizedGadget {
     public Gadget() {
         super(new Properties().group(BGItems.ITEM_GROUP).maxStackSize(1).maxDamage(0));
     }
