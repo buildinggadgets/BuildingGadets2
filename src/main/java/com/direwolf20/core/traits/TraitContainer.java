@@ -94,14 +94,16 @@ public final class TraitContainer implements ITraitContainer {
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        if (!nbt.contains(KEY_INSTALLED_UPGRADES, NBT.TAG_LIST))
+        if (! nbt.contains(KEY_INSTALLED_UPGRADES, NBT.TAG_LIST))
             return;
         ListNBT list = (ListNBT) nbt.get(KEY_INSTALLED_UPGRADES);
         assert list != null;
-        installedUpgrades.clear();
-        installedTiers.clear();
-        for (TraitValue<?> val : traits.values())
-            val.clearModificators();
+        if (! installedTiers.isEmpty()) { //shortcut the common case of no upgrade being installed
+            installedUpgrades.clear();
+            installedTiers.clear();
+            for (TraitValue<?> val : traits.values())
+                val.clearModificators();
+        }
         for (INBT serializedTier : list) {
             TieredUpgrade upgrade = TieredUpgrade.deserialize((CompoundNBT) serializedTier);
             installUpgrade(upgrade);

@@ -12,6 +12,7 @@ import com.direwolf20.core.traits.TraitContainer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -25,6 +26,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public abstract class EnergizedItem extends Item {
+    private static final String KEY_ENERGY = "energy";
     private static final String KEY_PROPERTIES = "properties";
     private static final String KEY_TRAITS = "traits";
 
@@ -80,8 +82,8 @@ public abstract class EnergizedItem extends Item {
         stack.getCapability(CapabilityEnergy.ENERGY)
                 .ifPresent(energyStorage -> {
                     @SuppressWarnings("unchecked") //we know the implementation class
-                    INBTSerializable<CompoundNBT> serializable = (INBTSerializable<CompoundNBT>) energyStorage;
-                    nbt.put(TraitEnergyStorage.KEY_ENERGY, serializable.serializeNBT());
+                            INBTSerializable<INBT> serializable = (INBTSerializable<INBT>) energyStorage;
+                    nbt.put(KEY_ENERGY, serializable.serializeNBT());
                 });
 
         return nbt;
@@ -104,13 +106,13 @@ public abstract class EnergizedItem extends Item {
                             nbt.remove(KEY_TRAITS);
                         });
 
-            if (nbt.contains(TraitEnergyStorage.KEY_ENERGY, NBT.TAG_COMPOUND))
+            if (nbt.contains(KEY_ENERGY))
                 stack.getCapability(CapabilityEnergy.ENERGY)
                         .ifPresent(energyStorage -> {
                             @SuppressWarnings("unchecked") //we know the implementation class
-                            INBTSerializable<CompoundNBT> serializable = (INBTSerializable<CompoundNBT>) energyStorage;
-                            serializable.deserializeNBT(nbt.getCompound(TraitEnergyStorage.KEY_ENERGY));
-                            nbt.remove(TraitEnergyStorage.KEY_ENERGY);
+                                    INBTSerializable<INBT> serializable = (INBTSerializable<INBT>) energyStorage;
+                            serializable.deserializeNBT(nbt.get(KEY_ENERGY));
+                            nbt.remove(KEY_ENERGY);
                         });
         }
         stack.setTag(nbt);
@@ -143,7 +145,7 @@ public abstract class EnergizedItem extends Item {
 
         public EnergyCapabilityProvider(ItemStack stack, ITraitContainer traitContainer, IPropertyContainer propertyContainer) {
             super(stack, traitContainer, propertyContainer);
-            energyStorage = new TraitEnergyStorage(traitContainer, this::onValueModified);
+            energyStorage = TraitEnergyStorage.createWithDefaultTraits(traitContainer, this::onValueModified);
             energyStorageOpt = LazyOptional.of(this::getEnergyStorage);
         }
 
@@ -164,7 +166,7 @@ public abstract class EnergizedItem extends Item {
         @Override
         public CompoundNBT serializeNBT() {
             CompoundNBT nbt = super.serializeNBT();
-            nbt.put(TraitEnergyStorage.KEY_ENERGY, getEnergyStorage().serializeNBT());
+            nbt.put(KEY_ENERGY, getEnergyStorage().serializeNBT());
 
             return nbt;
         }
@@ -173,8 +175,8 @@ public abstract class EnergizedItem extends Item {
         public void deserializeNBT(CompoundNBT nbt) {
             super.deserializeNBT(nbt);
 
-            if (nbt.contains(TraitEnergyStorage.KEY_ENERGY, NBT.TAG_COMPOUND))
-                getEnergyStorage().deserializeNBT(nbt.getCompound(TraitEnergyStorage.KEY_ENERGY));
+            if (nbt.contains(KEY_ENERGY))
+                getEnergyStorage().deserializeNBT(nbt.get(KEY_ENERGY));
         }
     }
 }

@@ -22,12 +22,14 @@ import javax.annotation.Nullable;
  * {@link #KEY_CHANGE_COUNT change count} property on the stack's {@link ItemStack#getTag() NBT-Tag}, every time a
  * {@link com.direwolf20.core.properties.Property Property} is modified or an {@link com.direwolf20.core.traits.upgrade.TieredUpgrade Upgrade}
  * is installed. As a result it is possible to implement syncing by reading and writing the nbt data of both caps to
- * the {@link net.minecraft.item.Item#getShareTag(ItemStack) ItemStacks Share Tag}.
+ * the {@link net.minecraft.item.Item#getShareTag(ItemStack) ItemStacks Share Tag}. This change count is intentionally only a byte
+ * and will overflow from time to time - this won't hurt us, as we only need it to change.
  * <p>
  * Notice that this {@link ICapabilityProvider} implements {@link INBTSerializable} and therefore enables the resulting caps to
  * be saved to the regular cap storage.
  */
 public class PropertyTraitCapabilityProvider implements ICapabilityProvider, INBTSerializable<CompoundNBT> {
+    //the key is longer then the actual value... I'm tempted to use just 'c' or even the empty string as key for this
     private static final String KEY_CHANGE_COUNT = "change_count";
     private static final String KEY_TRAITS = "traits";
     private static final String KEY_PROPERTIES = "properties";
@@ -90,7 +92,7 @@ public class PropertyTraitCapabilityProvider implements ICapabilityProvider, INB
 
     protected void onValueModified() {
         CompoundNBT nbt = stack.getOrCreateTag();
-        nbt.putInt(KEY_CHANGE_COUNT, nbt.getInt(KEY_CHANGE_COUNT)+1);
+        nbt.putByte(KEY_CHANGE_COUNT, (byte) (nbt.getByte(KEY_CHANGE_COUNT) + 1));
     }
 
 }

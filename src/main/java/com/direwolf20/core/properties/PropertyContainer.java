@@ -1,5 +1,6 @@
 package com.direwolf20.core.properties;
 
+import com.direwolf20.core.DireCore20;
 import com.google.common.base.Preconditions;
 import net.minecraft.nbt.CompoundNBT;
 
@@ -8,6 +9,8 @@ import java.util.*;
 /**
  * The default {@link IPropertyContainer} which is created using a {@link Builder} to add the {@link Property Properties}
  * represented by this container.
+ * <p>
+ * Notice that it does accept null values and serializers must handle this somehow!
  *
  * @see IPropertyContainer
  * @see Property
@@ -51,8 +54,7 @@ public final class PropertyContainer implements IPropertyContainer {
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         for (Map.Entry<Property<?>, Object> entry : properties.entrySet())
-            if (entry.getValue() != null)
-                nbt.put(entry.getKey().getName(), entry.getKey().serializeValue(entry.getValue()));
+            nbt.put(entry.getKey().getName(), entry.getKey().serializeValue(entry.getValue()));
         return nbt;
     }
 
@@ -62,6 +64,8 @@ public final class PropertyContainer implements IPropertyContainer {
             Property<?> prop = propertyByName.get(key);
             if (prop != null) //This implicitly also checks whether the property is already in here...
                 properties.put(prop, prop.deserialize(nbt.get(key)));
+            else
+                DireCore20.LOG.warn("Attempted to deserialize unknown Property {}. This might just be a version difference - or a bug.", key);
         }
     }
 

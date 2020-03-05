@@ -73,6 +73,8 @@ public final class Property<T> {
     }
 
     public INBT serializeValue(Object value) {
+        if (value == null)
+            return serialize(null);
         return serialize(cast(value));
     }
 
