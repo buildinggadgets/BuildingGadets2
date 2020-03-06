@@ -6,6 +6,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
+/**
+ * A delegating {@link IPropertyContainer} implementation, which allows users to add a callback every time a Property changes.
+ * Used for example by {@link com.direwolf20.core.capability.PropertyTraitCapabilityProvider} to keep track of changes made
+ * to Properties.
+ */
 public final class ModificationPropertyContainer implements IPropertyContainer {
     private final IPropertyContainer delegate;
     private final BiConsumer<MutableProperty<?>, Object> onModificationCallback;

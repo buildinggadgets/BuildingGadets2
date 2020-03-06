@@ -7,7 +7,12 @@ import net.minecraft.nbt.CompoundNBT;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
-
+/**
+ * A delegating {@link ITraitContainer} implementation, which allows users to add a callback every time an Upgrade
+ * is installed or uninstalled.
+ * Used for example by {@link com.direwolf20.core.capability.PropertyTraitCapabilityProvider} to keep track of changes made
+ * to Traits.
+ */
 public final class ModificationTraitContainer implements ITraitContainer{
     private final ITraitContainer delegate;
     private final BiConsumer<TieredUpgrade, Boolean> upgradeCallback;

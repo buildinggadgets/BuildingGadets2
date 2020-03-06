@@ -9,6 +9,7 @@ import com.direwolf20.core.properties.PropertyContainer;
 import com.direwolf20.core.traits.ITraitContainer;
 import com.direwolf20.core.traits.Trait;
 import com.direwolf20.core.traits.TraitContainer;
+import com.direwolf20.core.traits.TraitContainer.Builder;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -25,6 +26,17 @@ import net.minecraftforge.energy.IEnergyStorage;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+/**
+ * Abstract Base class for an FE using Gadget. The {@link IEnergyStorage} implementation used by this Gadget is guaranteed to
+ * be an instance of {@link TraitEnergyStorage}, which will be synced from Server to Client automatically. For this to be backed
+ * by appropriate default values, the abstract Methods {@link #getMaxEnergy()}, {@link #getMaxReceive()} and {@link #getMaxExtract()}
+ * were added. These are meant to return the corresponding config value or some function of it.
+ * <p>
+ * Notice that this class also adds both the {@link IPropertyContainer} and {@link ITraitContainer} capabilities and enables
+ * subclasses to add their own {@link Trait Traits} and {@link com.direwolf20.core.properties.Property Properties} by
+ * overriding {@link #onAttachTraits(Builder)} and {@link #onAttachProperties(PropertyContainer.Builder)}. These will be synced
+ * alongside the {@link IEnergyStorage} capability.
+ */
 public abstract class EnergizedGadget extends Item {
     private static final String KEY_ENERGY = "energy";
     private static final String KEY_PROPERTIES = "properties";
@@ -34,6 +46,13 @@ public abstract class EnergizedGadget extends Item {
         super(properties);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Notice that this class expects every {@link ICapabilityProvider} returned by this Method to implement
+     * {@link INBTSerializable<CompoundNBT>}. Furthermore this Method is responsible for attaching Properties
+     * and Traits.
+     */
     @Override
     @SuppressWarnings("unchecked")
     public final ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundNBT nbt) {
@@ -41,20 +60,44 @@ public abstract class EnergizedGadget extends Item {
         IPropertyContainer propertyContainer = onAttachProperties(PropertyContainer.builder()).build();
         ICapabilityProvider provider = createCapabilities(stack, traitContainer, propertyContainer);
 
-        if (nbt != null)
+        if (nbt != null) //The contract states that it will be INBTSerializable<CompoundNBT> - safe cast
             ((INBTSerializable<CompoundNBT>) provider).deserializeNBT(nbt);
 
         return provider;
     }
 
+    /**
+     * @param stack             The {@link ItemStack}
+     * @param traitContainer    The {@link ITraitContainer} which was constructed for this {@link Item}
+     * @param propertyContainer The {@link IPropertyContainer} which was constructed for this {@link Item}
+     * @return An {@link ICapabilityProvider} which will be returned from {@link #initCapabilities(ItemStack, CompoundNBT)}.
+     * It is required that this instance implements {@link INBTSerializable<CompoundNBT>}, as deserialize may be called
+     * immediately after this Method returns!
+     */
     protected ICapabilityProvider createCapabilities(ItemStack stack, ITraitContainer traitContainer, IPropertyContainer propertyContainer) {
         return new EnergyCapabilityProvider(stack, traitContainer, propertyContainer);
     }
 
+    /**
+     * Override this Method to add your own Properties to the resulting Gadget.
+     *
+     * @param builder The {@link PropertyContainer.Builder} used for adding Properties
+     * @return the passed in builder instance, to allow for Method chaining
+     */
     protected PropertyContainer.Builder onAttachProperties(PropertyContainer.Builder builder) {
         return builder;
     }
 
+    /**
+     * Override this Method to add your own Traits to the resulting Gadget. By default {@link Trait#MAX_ENERGY},
+     * {@link Trait#MAX_RECEIVE} and {@link Trait#MAX_EXTRACT} will be added using the matching abstract
+     * Methods as suppliers for the default values. If you want to use different Traits for you {@link IEnergyStorage}
+     * (for example because you want to use different upgrades), just don't call super and adapt the {@link EnergyCapabilityProvider}
+     * accordingly.
+     *
+     * @param builder The {@link PropertyContainer.Builder} used for adding Properties
+     * @return the passed in builder instance, to allow for Method chaining
+     */
     protected TraitContainer.Builder onAttachTraits(TraitContainer.Builder builder) {
         return builder
                 .putTrait(Trait.MAX_ENERGY, this::getMaxEnergy)
@@ -139,6 +182,9 @@ public abstract class EnergizedGadget extends Item {
         return 255 << 16;//red for energy
     }
 
+    /**
+     * A subclass of {@link PropertyTraitCapabilityProvider} adding the {@link IEnergyStorage} capability.
+     */
     protected static class EnergyCapabilityProvider extends PropertyTraitCapabilityProvider {
         private final TraitEnergyStorage energyStorage;
         private final LazyOptional<IEnergyStorage> energyStorageOpt;

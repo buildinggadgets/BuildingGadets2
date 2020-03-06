@@ -25,6 +25,9 @@ import javax.annotation.Nullable;
  * the {@link net.minecraft.item.Item#getShareTag(ItemStack) ItemStacks Share Tag}. This change count is intentionally only a byte
  * and will overflow from time to time - this won't hurt us, as we only need it to change.
  * <p>
+ * Subclasses who intend on implementing similar syncing mechanisms, may just call {@link #onValueModified()} any time a value was modified.
+ * The {@link ItemStack#getTag() Stack-Tag} will be modified as described above.
+ * <p>
  * Notice that this {@link ICapabilityProvider} implements {@link INBTSerializable} and therefore enables the resulting caps to
  * be saved to the regular cap storage.
  */
