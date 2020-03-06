@@ -28,8 +28,8 @@ import javax.annotation.Nullable;
 
 /**
  * Abstract Base class for an FE using Gadget. The {@link IEnergyStorage} implementation used by this Gadget is guaranteed to
- * be an instance of {@link TraitEnergyStorage}, which will be synced from Server to Client automatically. For this to be backed
- * by appropriate default values, the abstract Methods {@link #getMaxEnergy()}, {@link #getMaxReceive()} and {@link #getMaxExtract()}
+ * be an instance of {@link INBTSerializable<INBT>}, which will be synced from Server to Client automatically. For the {@link TraitEnergyStorage}
+ * to be backed by appropriate default values, the abstract Methods {@link #getMaxEnergy()}, {@link #getMaxReceive()} and {@link #getMaxExtract()}
  * were added. These are meant to return the corresponding config value or some function of it.
  * <p>
  * Notice that this class also adds both the {@link IPropertyContainer} and {@link ITraitContainer} capabilities and enables
@@ -67,6 +67,10 @@ public abstract class EnergizedGadget extends Item {
     }
 
     /**
+     * Notice that {@link #readShareTag(ItemStack, CompoundNBT)} and {@link #getShareTag(ItemStack)} assumes that the
+     * {@link IEnergyStorage} implementation returned by the cap provider, returned from this Method is an instance of
+     * {@link INBTSerializable<INBT>} - subclasses must ensure that this remains true, or override the share tag Methods!
+     *
      * @param stack             The {@link ItemStack}
      * @param traitContainer    The {@link ITraitContainer} which was constructed for this {@link Item}
      * @param propertyContainer The {@link IPropertyContainer} which was constructed for this {@link Item}
