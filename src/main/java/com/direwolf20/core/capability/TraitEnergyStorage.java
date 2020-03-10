@@ -43,7 +43,7 @@ public final class TraitEnergyStorage implements IEnergyStorage, INBTSerializabl
      * Use this if you need to use different {@link Trait Traits} then {@link Trait#MAX_ENERGY}, {@link Trait#MAX_RECEIVE} and
      * {@link Trait#MAX_EXTRACT}.
      * <p>
-     * For creating a default instance, use {@link #create(ITraitContainer)}. Fr creating a instance with just a different change callback
+     * For creating a default instance, use {@link #create(ITraitContainer)}. For creating a instance with just a different change callback
      * use {@link #createWithDefaultTraits(ITraitContainer, Runnable)} or {@link #createWithDefaultTraits(ITraitContainer, Consumer)}.
      *
      * @param container The container to back the {@link TraitEnergyStorage}. Must not be null.
