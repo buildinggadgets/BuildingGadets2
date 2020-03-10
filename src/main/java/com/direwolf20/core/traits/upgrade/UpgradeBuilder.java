@@ -14,7 +14,7 @@ import java.util.function.UnaryOperator;
  * a {@link Range} object.
  */
 public final class UpgradeBuilder {
-    private final ImmutableMap.Builder<Trait<?>, Function<TieredUpgrade, UnaryOperator<?>>> modifications;
+    private final ImmutableMap.Builder<Trait<?>, Function<UpgradeStack, UnaryOperator<?>>> modifications;
 
     private UpgradeBuilder() {
         modifications = ImmutableMap.builder();
@@ -28,29 +28,29 @@ public final class UpgradeBuilder {
      * All other modification adding functions delegate through to this Method!
      *
      * @param trait   The trait to add or replace
-     * @param factory Factory function, for mapping a {@link TieredUpgrade} to a corresponding operator
+     * @param factory Factory function, for mapping a {@link UpgradeStack} to a corresponding operator
      * @param <T>     The value type
      * @return The builder instance
      * @throws NullPointerException if either trait or factory are null
      */
-    public <T> UpgradeBuilder putModification(Trait<T> trait, Function<TieredUpgrade, UnaryOperator<?>> factory) {
+    public <T> UpgradeBuilder putModification(Trait<T> trait, Function<UpgradeStack, UnaryOperator<?>> factory) {
         modifications.put(Objects.requireNonNull(trait), Objects.requireNonNull(factory));
         return this;
     }
 
-    public UpgradeBuilder sumModifier(Trait<Integer> trait, Function<TieredUpgrade, Integer> additionFactory) {
+    public UpgradeBuilder sumModifier(Trait<Integer> trait, Function<UpgradeStack, Integer> additionFactory) {
         return putModification(trait, tieredUpgrade -> ((Integer i) -> (additionFactory.apply(tieredUpgrade) + i)));
     }
 
-    public UpgradeBuilder floatSumModifier(Trait<Double> trait, Function<TieredUpgrade, Double> additionFactory) {
+    public UpgradeBuilder floatSumModifier(Trait<Double> trait, Function<UpgradeStack, Double> additionFactory) {
         return putModification(trait, tieredUpgrade -> ((Double d) -> (additionFactory.apply(tieredUpgrade) + d)));
     }
 
-    public UpgradeBuilder multiplicationModifier(Trait<Integer> trait, Function<TieredUpgrade, Integer> multiplicationFactory) {
+    public UpgradeBuilder multiplicationModifier(Trait<Integer> trait, Function<UpgradeStack, Integer> multiplicationFactory) {
         return putModification(trait, tieredUpgrade -> ((Integer i) -> (multiplicationFactory.apply(tieredUpgrade) * i)));
     }
 
-    public UpgradeBuilder floatMultiplicationModifier(Trait<Double> trait, Function<TieredUpgrade, Double> multiplicationFactory) {
+    public UpgradeBuilder floatMultiplicationModifier(Trait<Double> trait, Function<UpgradeStack, Double> multiplicationFactory) {
         return putModification(trait, tieredUpgrade -> ((Double d) -> (multiplicationFactory.apply(tieredUpgrade) * d)));
     }
 
@@ -67,10 +67,10 @@ public final class UpgradeBuilder {
     }
 
     private static final class BuiltUpgrade extends Upgrade {
-        private final ImmutableMap<Trait<?>, Function<TieredUpgrade, UnaryOperator<?>>> modifications;
+        private final ImmutableMap<Trait<?>, Function<UpgradeStack, UnaryOperator<?>>> modifications;
         private final Range<Integer> validTiers;
 
-        public BuiltUpgrade(ImmutableMap<Trait<?>, Function<TieredUpgrade, UnaryOperator<?>>> modifications, Range<Integer> validTiers) {
+        public BuiltUpgrade(ImmutableMap<Trait<?>, Function<UpgradeStack, UnaryOperator<?>>> modifications, Range<Integer> validTiers) {
             super(modifications.keySet());
             this.modifications = modifications;
             this.validTiers = validTiers;
@@ -83,8 +83,8 @@ public final class UpgradeBuilder {
 
         @Override
         @SuppressWarnings("unchecked") //This is a safe cast, as only type safe operators have been added to the map
-        public <T> UnaryOperator<T> getModificatorFor(Trait<T> trait, TieredUpgrade tier) {
-            Function<TieredUpgrade, UnaryOperator<?>> factory = modifications.get(trait); //Kotlin, where are you, when one needs you... :(
+        public <T> UnaryOperator<T> getModificatorFor(Trait<T> trait, UpgradeStack tier) {
+            Function<UpgradeStack, UnaryOperator<?>> factory = modifications.get(trait); //Kotlin, where are you, when one needs you... :(
             return factory != null ? (UnaryOperator<T>) factory.apply(tier) : null;
         }
     }

@@ -3,6 +3,7 @@ package com.direwolf20.core.capability;
 import com.direwolf20.core.DireCore20;
 import com.direwolf20.core.traits.ITraitContainer;
 import com.direwolf20.core.traits.Trait;
+import com.google.common.base.Preconditions;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.IntNBT;
 import net.minecraft.util.math.MathHelper;
@@ -44,7 +45,7 @@ public final class TraitEnergyStorage implements IEnergyStorage, INBTSerializabl
      * {@link Trait#MAX_EXTRACT}.
      * <p>
      * For creating a default instance, use {@link #create(ITraitContainer)}. Fr creating a instance with just a different change callback
-     * use {@link #createWithDefaultTraits(ITraitContainer, Runnable)} or {@link #createWithDefaultTraits(ITraitContainer, Consumer)}.
+     * use {@link #createWithDefaultTraits(ITraitContainer, Runnable)}.
      *
      * @param container The container to back the {@link TraitEnergyStorage}. Must not be null.
      * @return A new {@link Builder}
@@ -55,10 +56,6 @@ public final class TraitEnergyStorage implements IEnergyStorage, INBTSerializabl
 
     public static TraitEnergyStorage create(ITraitContainer container) {
         return builder(container).build();
-    }
-
-    public static TraitEnergyStorage createWithDefaultTraits(ITraitContainer container, Consumer<TraitEnergyStorage> onChangeCallback) {
-        return builder(container).onChangeCallback(onChangeCallback).build();
     }
 
     public static TraitEnergyStorage createWithDefaultTraits(ITraitContainer container, Runnable onChangeCallback) {
@@ -161,13 +158,10 @@ public final class TraitEnergyStorage implements IEnergyStorage, INBTSerializabl
             return this;
         }
 
-        public Builder onChangeCallback(Consumer<TraitEnergyStorage> onChangeCallback) {
-            this.onChangeCallback = Objects.requireNonNull(onChangeCallback);
-            return this;
-        }
-
         public Builder onChangeCallback(Runnable onChangeCallback) {
-            return onChangeCallback(s -> onChangeCallback.run());
+            Preconditions.checkArgument(onChangeCallback != null);
+            this.onChangeCallback = s -> onChangeCallback.run();
+            return this;
         }
 
         public Builder maxEnergy(Trait<Integer> maxEnergy) {

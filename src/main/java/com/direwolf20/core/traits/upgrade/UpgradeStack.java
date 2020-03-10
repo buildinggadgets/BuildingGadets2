@@ -17,28 +17,28 @@ import java.util.function.UnaryOperator;
  *
  * @see Upgrade
  */
-public final class TieredUpgrade {
+public final class UpgradeStack {
     private static final String KEY_UPGRADE_ID = "upgrade";
     private static final String KEY_TIER = "tier";
     @Nonnull
     private final Upgrade upgrade;
     private final int level;
 
-    public TieredUpgrade(Upgrade upgrade, int level) {
+    public UpgradeStack(Upgrade upgrade, int level) {
         Preconditions.checkNotNull(upgrade);
         Preconditions.checkArgument(upgrade.getRegistryName() != null && upgrade.isValidLevel(level), "Cannot have level " + level + " for upgrade " + upgrade.getRegistryName());
         this.upgrade = upgrade;
         this.level = level;
     }
 
-    public static TieredUpgrade deserialize(CompoundNBT nbt) {
+    public static UpgradeStack deserialize(CompoundNBT nbt) {
         int tier = nbt.getInt(KEY_TIER);
         Upgrade upgrade;
         if (nbt.contains(KEY_UPGRADE_ID, NBT.TAG_STRING))
             upgrade = Registries.getUpgradeRegistry().getValue(new ResourceLocation(nbt.getString(KEY_UPGRADE_ID)));
         else
             upgrade = Registries.getUpgradeRegistry().getValue(nbt.getInt(KEY_UPGRADE_ID));
-        return new TieredUpgrade(upgrade, tier);
+        return new UpgradeStack(upgrade, tier);
     }
 
     @Nonnull
@@ -76,9 +76,9 @@ public final class TieredUpgrade {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TieredUpgrade)) return false;
+        if (! (o instanceof UpgradeStack)) return false;
 
-        final TieredUpgrade that = (TieredUpgrade) o;
+        final UpgradeStack that = (UpgradeStack) o;
 
         if (level != that.level) return false;
         return getUpgrade().equals(that.getUpgrade());

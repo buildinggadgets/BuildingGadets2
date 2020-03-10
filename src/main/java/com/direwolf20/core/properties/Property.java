@@ -111,15 +111,12 @@ public final class Property<T> {
         }
 
         public Builder<T> name(ResourceLocation resourceLocation) {
-            return name(resourceLocation.toString());
+            this.name = resourceLocation.toString();
+            return this;
         }
 
         public Builder<T> name(String modid, String path) {
-            return name(modid + ":" + path);
-        }
-
-        public Builder<T> name(String name) {
-            this.name = Objects.requireNonNull(name);
+            this.name = Objects.requireNonNull(modid) + ":" + Objects.requireNonNull(path);
             return this;
         }
 
@@ -143,11 +140,6 @@ public final class Property<T> {
             return build();
         }
 
-        public Property<T> build(String name) {
-            name(name);
-            return build();
-        }
-
         public Property<T> build() {
             return new Property<>(type, name, serializer, deserializer);
         }
@@ -159,11 +151,6 @@ public final class Property<T> {
 
         public MutableProperty<T> buildMutable(String modid, String path) {
             name(modid, path);
-            return buildMutable();
-        }
-
-        public MutableProperty<T> buildMutable(String name) {
-            name(name);
             return buildMutable();
         }
 

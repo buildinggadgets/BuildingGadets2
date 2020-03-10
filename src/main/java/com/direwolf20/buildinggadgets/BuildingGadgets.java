@@ -1,6 +1,6 @@
 package com.direwolf20.buildinggadgets;
 
-import com.direwolf20.buildinggadgets.common.registry.BGItems;
+import com.direwolf20.buildinggadgets.common.items.BGItems;
 import com.direwolf20.core.DireCore20;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;

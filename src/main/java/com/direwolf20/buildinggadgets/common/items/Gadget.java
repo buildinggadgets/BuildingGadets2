@@ -1,7 +1,6 @@
 package com.direwolf20.buildinggadgets.common.items;
 
-import com.direwolf20.buildinggadgets.common.registry.BGItems;
-import com.direwolf20.core.items.EnergizedGadget;
+import com.direwolf20.core.items.EnergizedItem;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -16,9 +15,10 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public abstract class Gadget extends EnergizedGadget {
+public abstract class Gadget extends EnergizedItem {
     public Gadget() {
-        super(new Properties().group(BGItems.ITEM_GROUP).maxStackSize(1).maxDamage(0));
+        super(new Properties().group(BGItems.ITEM_GROUP).maxStackSize(1).maxDamage(0),
+                () -> 1000); //TODO add as constructor parameter and pass the config value down, as soon as a config is added
     }
 
     @Override
