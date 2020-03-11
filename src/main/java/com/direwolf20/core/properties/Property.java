@@ -17,10 +17,16 @@ import java.util.function.Function;
  * <p>
  * Notice that as of this writing a Property must be capable of serializing and deserializing it's values, as well as having a
  * {@link IPropertyContainer container} wide unique name.
- * @see IPropertyContainer
+ *
  * @param <T> The type of the values represented by this Property
+ * @see IPropertyContainer
  */
 public final class Property<T> {
+    private final Class<T> type;
+    private final String name;
+    private final Function<T, INBT> serializer;
+    private final Function<INBT, T> deserializer;
+
     private Property(Class<T> type, String name, Function<T, INBT> serializer, Function<INBT, T> deserializer) {
         this.type = Objects.requireNonNull(type, "Cannot have a property without a type!");
         this.name = Objects.requireNonNull(name, "Cannot have a property without a name!");
@@ -29,9 +35,8 @@ public final class Property<T> {
     }
 
     /**
-     *
      * @param type The class of the values represented by the resulting {@link Property}
-     * @param <T> The type of the values represented by the resulting {@link Property}
+     * @param <T>  The type of the values represented by the resulting {@link Property}
      * @return a new {@link Builder}
      */
     public static <T> Builder<T> builder(Class<T> type) {
@@ -59,11 +64,6 @@ public final class Property<T> {
         return builder(Float.class).serializer(FloatNBT::valueOf).deserializer(inbt -> ((FloatNBT) inbt).getFloat());
     }
 
-    private final Class<T> type;
-    private final String name;
-    private final Function<T, INBT> serializer;
-    private final Function<INBT, T> deserializer;
-
     T cast(Object value) {
         return type.cast(Objects.requireNonNull(value));
     }
@@ -73,6 +73,8 @@ public final class Property<T> {
     }
 
     public INBT serializeValue(Object value) {
+        if (value == null)
+            return serialize(null);
         return serialize(cast(value));
     }
 
@@ -95,6 +97,7 @@ public final class Property<T> {
     /**
      * A simple builder to allow chaining of the required values, instead of being required to pass values to a lengthy factory Method.
      * It also offers some utility overloads.
+     *
      * @param <T> The type of the resulting {@link Property}
      */
     public static final class Builder<T> {
@@ -108,15 +111,12 @@ public final class Property<T> {
         }
 
         public Builder<T> name(ResourceLocation resourceLocation) {
-            return name(resourceLocation.toString());
+            this.name = resourceLocation.toString();
+            return this;
         }
 
         public Builder<T> name(String modid, String path) {
-            return name(modid+":"+path);
-        }
-
-        public Builder<T> name(String name) {
-            this.name = Objects.requireNonNull(name);
+            this.name = Objects.requireNonNull(modid) + ":" + Objects.requireNonNull(path);
             return this;
         }
 
@@ -140,11 +140,6 @@ public final class Property<T> {
             return build();
         }
 
-        public Property<T> build(String name) {
-            name(name);
-            return build();
-        }
-
         public Property<T> build() {
             return new Property<>(type, name, serializer, deserializer);
         }
@@ -156,11 +151,6 @@ public final class Property<T> {
 
         public MutableProperty<T> buildMutable(String modid, String path) {
             name(modid, path);
-            return buildMutable();
-        }
-
-        public MutableProperty<T> buildMutable(String name) {
-            name(name);
             return buildMutable();
         }
 

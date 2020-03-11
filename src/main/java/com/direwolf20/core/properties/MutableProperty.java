@@ -5,14 +5,15 @@ import net.minecraft.nbt.INBT;
 
 /**
  * A wrapper around {@link Property} to allow for
+ *
  * @param <T>
  */
 public final class MutableProperty<T> {
+    private final Property<T> delegate;
+
     MutableProperty(Property<T> delegate) {
         this.delegate = delegate;
     }
-
-    private final Property<T> delegate;
 
     public T cast(Object value) {
         return delegate.cast(value);

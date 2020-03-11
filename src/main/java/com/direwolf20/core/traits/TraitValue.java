@@ -1,6 +1,6 @@
 package com.direwolf20.core.traits;
 
-import com.direwolf20.core.traits.upgrade.TieredUpgrade;
+import com.direwolf20.core.traits.upgrade.UpgradeStack;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -9,11 +9,12 @@ import java.util.function.UnaryOperator;
 
 /**
  * Utility class for managing the value represented by a {@link Trait} in some {@link ITraitContainer}.
+ *
  * @param <T> The type of value
  */
 final class TraitValue<T> {
     private final Supplier<T> defaultValue;
-    private final Map<TieredUpgrade, UnaryOperator<T>> modificators;
+    private final Map<UpgradeStack, UnaryOperator<T>> modificators;
 
     TraitValue(Supplier<T> defaultValue) {
         this.defaultValue = defaultValue;
@@ -22,20 +23,20 @@ final class TraitValue<T> {
 
     T getValue() {
         T base = defaultValue.get();
-        for (UnaryOperator<T> op: modificators.values())
+        for (UnaryOperator<T> op : modificators.values())
             base = op.apply(base);
         return base;
     }
 
-    boolean addModificator(TieredUpgrade upgrade, UnaryOperator<T> unaryOperator) {
+    boolean addModificator(UpgradeStack upgrade, UnaryOperator<T> unaryOperator) {
         if (modificators.containsKey(upgrade))
             return false;
         modificators.put(upgrade, unaryOperator);
         return true;
     }
 
-    boolean removeModificator(TieredUpgrade upgrade) {
-        return modificators.remove(upgrade)!=null;
+    boolean removeModificator(UpgradeStack upgrade) {
+        return modificators.remove(upgrade) != null;
     }
 
     void clearModificators() {

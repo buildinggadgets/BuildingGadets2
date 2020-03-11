@@ -14,11 +14,11 @@ import net.minecraftforge.registries.RegistryBuilder;
 @EventBusSubscriber(bus = Bus.MOD)
 public enum Registries {
     ;
-    public static final ResourceLocation UPGRADE_REGISTRY_NAME = new ResourceLocation(DireCore20.MOD_ID +":upgrade_type");
+    public static final ResourceLocation UPGRADE_REGISTRY_NAME = new ResourceLocation(DireCore20.MOD_ID + ":upgrade_type");
     private static ForgeRegistry<Upgrade> UPGRADES = null;
 
     public static ForgeRegistry<Upgrade> getUpgradeRegistry() {
-        Preconditions.checkState(UPGRADES!=null, "Attempted to access Upgrade-Registry before it could be created!");
+        Preconditions.checkState(UPGRADES != null, "Attempted to access Upgrade-Registry before it could be created!");
         return UPGRADES;
     }
 

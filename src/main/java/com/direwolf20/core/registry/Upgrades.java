@@ -11,6 +11,7 @@ public enum Upgrades {
     ;
     public static DeferredRegister<Upgrade> UPGRADES = null;
     public static RegistryObject<Upgrade> BLANK = null;
+
     //This is suboptimally solved by Forge - how would BG handle the Registry being created in the RegistryEvent.NewRegistry event?
     //I think it could therefore not use DeferredRegister for this
     public static void onUpgradesCreated() {
