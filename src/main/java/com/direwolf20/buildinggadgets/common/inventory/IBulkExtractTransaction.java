@@ -1,4 +1,4 @@
-package com.direwolf20.core.inventory;
+package com.direwolf20.buildinggadgets.common.inventory;
 
 import net.minecraft.item.ItemStack;
 

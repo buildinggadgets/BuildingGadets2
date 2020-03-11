@@ -1,4 +1,4 @@
-package com.direwolf20.core.inventory;
+package com.direwolf20.buildinggadgets.common.inventory;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultiset;
