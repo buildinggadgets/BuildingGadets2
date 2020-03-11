@@ -5,12 +5,11 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Multiset.Entry;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -18,12 +17,16 @@ import java.util.*;
 public class PlayerItemIndex implements IItemIndex {
     private final WeakReference<PlayerEntity> player;
     private InventoryLink boundInv;
-    private PlayerItemTransaction transaction;
+    private final Multiset<IndexKey> indices;
+    private final Multimap<IndexKey, Integer> slotByItem;
+    private PlayerExtractTransaction transaction;
 
     public PlayerItemIndex(PlayerEntity player) {
         this.player = new WeakReference<>(Objects.requireNonNull(player, "A player Item Index always requires a player to start with!"));
-        this.transaction = new PlayerItemTransaction();
+        this.transaction = new PlayerExtractTransaction();
         this.boundInv = null;
+        this.indices = HashMultiset.create();
+        this.slotByItem = ArrayListMultimap.create();
     }
 
     public PlayerItemIndex(PlayerEntity player, InventoryLink boundInv) {
@@ -39,22 +42,72 @@ public class PlayerItemIndex implements IItemIndex {
         return boundInv != null ? boundInv.getIndex() : Optional.empty();
     }
 
+    private LazyOptional<IItemHandler> getPlayerHandler() {
+        PlayerEntity thePlayer = player.get();
+        return thePlayer != null ? thePlayer.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) : LazyOptional.empty();
+    }
+
     @Override
-    public IBulkItemTransaction bulkTransaction() {
+    public IBulkExtractTransaction bulkTransaction() {
         return transaction;
     }
 
     @Override
-    public boolean reIndex() {
-        if (boundInv != null)
-            boundInv.getIndex().ifPresent(IItemIndex::reIndex);
+    public int extractItem(ItemStack stack) {
+        //code copied from below, to avoid unnnessecary key creation
+        return getPlayerHandler()
+                .map(handler -> insertStackIntoHandler(handler, stack, stack.getCount()))
+                .orElse(0);
+    }
 
-        return false;
+    @Override
+    public int insertItem(IndexKey key, int count) {
+        return getPlayerHandler()
+                .map(handler -> insertStackIntoHandler(handler, key.createStack(count), count))
+                .orElse(0);
+    }
+
+    @Override
+    public boolean reIndex() {
+        getBoundIndex().ifPresent(IItemIndex::reIndex);
+        performIndex();
+        return true;
     }
 
     @Override
     public boolean updateIndex() {
-        return false;
+        getBoundIndex().ifPresent(IItemIndex::updateIndex);
+        //player inventory is so small - always re-Index...
+        performIndex();
+        return true;
+    }
+
+    private int insertStackIntoHandler(IItemHandler handler, ItemStack stack, int count) {
+        for (int i = 0; i < handler.getSlots(); i++) {
+            stack = handler.insertItem(i, stack, false);
+            if (stack.isEmpty())
+                return count;
+        }
+        ItemStack fStack = stack;
+        return getBoundIndex()
+                .map(index -> index.insertItem(fStack, fStack.getCount()))
+                .orElseGet(() -> count - fStack.getCount());
+    }
+
+    private void performIndex() {
+        getPlayerHandler().ifPresent(handler -> {
+            transaction.commit();
+            indices.clear();
+            slotByItem.clear();
+            for (int i = 0; i < handler.getSlots(); i++) {
+                ItemStack stack = handler.getStackInSlot(i);
+                if (! stack.isEmpty()) {
+                    IndexKey key = IndexKey.ofStack(stack);
+                    indices.add(key, stack.getCount());
+                    slotByItem.put(key, i);
+                }
+            }
+        });
     }
 
     @Override
@@ -78,37 +131,19 @@ public class PlayerItemIndex implements IItemIndex {
         return boundInv != null ? Collections.singletonList(boundInv) : Collections.emptyList();
     }
 
-    @Override
-    public IItemCache copyCache() {
-        return transaction.copyCache();
-    }
-
-    private final class PlayerItemTransaction implements IBulkItemTransaction {
-        private final Multiset<IndexKey> indices;
-        private final Int2ObjectMap<IndexKey> itemBySlot;
-        private final Multimap<IndexKey, Integer> slotByItem;
+    private final class PlayerExtractTransaction implements IBulkExtractTransaction {
         private Multiset<IndexKey> pendingExtractTransactions;
-        private Multiset<IndexKey> pendingInsertTransactions;
 
-        public PlayerItemTransaction() {
-            this.indices = HashMultiset.create();
-            this.slotByItem = ArrayListMultimap.create();
-            this.itemBySlot = new Int2ObjectOpenHashMap<>();
-            this.pendingInsertTransactions = null;
+        public PlayerExtractTransaction() {
             this.pendingExtractTransactions = null;
         }
 
         @Override
-        public CommitResult commit() {
-            if (pendingInsertTransactions == null && pendingExtractTransactions == null)
-                return CommitResult.NO_ACTION;
-            PlayerEntity thePlayer = player.get();
-            if (thePlayer == null)
-                return CommitResult.NO_ACTION;
-            return thePlayer.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).map(handler -> {
-                Multiset<IndexKey> missing = HashMultiset.create();
-                Multiset<IndexKey> notInserted = HashMultiset.create();
-                Optional<IBulkItemTransaction> link = getBoundIndex().map(IItemIndex::bulkTransaction);
+        public void commit() {
+            if (pendingExtractTransactions == null || pendingExtractTransactions.isEmpty())
+                return;
+            getPlayerHandler().ifPresent(handler -> {
+                Optional<IBulkExtractTransaction> link = getBoundIndex().map(IItemIndex::bulkTransaction);
                 for (Entry<IndexKey> entry : pendingExtractTransactions.entrySet()) {
                     int count = entry.getCount();
                     Iterator<Integer> it = slotByItem.get(entry.getElement()).iterator();
@@ -124,75 +159,36 @@ public class PlayerItemIndex implements IItemIndex {
                     }
                     if (count != 0) {
                         final int fCount = count;
-                        count = link.map(index -> index.extractItem(entry.getElement(), fCount, false)).orElse(count);
-                        if (! link.isPresent())
-                            missing.add(entry.getElement(), count);
+                        link.ifPresent(index -> index.extractItem(entry.getElement(), fCount));
                     }
                 }
-                for (Entry<IndexKey> entry : pendingInsertTransactions.entrySet()) {
-                    int count = entry.getCount();
-                    for (int i : slotByItem.get(entry.getElement())) {
-                        count = handler.insertItem(i, entry.getElement().createStack(count), false).getCount();
-                        if (count == 0)
-                            break;
-                    }
-                    if (count != 0) {
-                        Iterator<Integer> it = slotByItem.get(IndexKey.EMPTY).iterator();
-                        IntList addedSlots = new IntArrayList();
-                        while (it.hasNext()) {
-                            int i = it.next();
-                            count = handler.insertItem(i, entry.getElement().createStack(count), false).getCount();
-                            if (! handler.getStackInSlot(i).isEmpty()) {
-                                addedSlots.add(i);
-                                it.remove();
-                            }
-                            if (count == 0)
-                                break;
-                        }
-                        slotByItem.putAll(entry.getElement(), addedSlots);
-                        if (count != 0) {
-                            final int fCount = count;
-                            count = link.map(index -> index.insertItem(entry.getElement(), fCount, false)).orElse(count);
-                            if (! link.isPresent())
-                                notInserted.add(entry.getElement(), count);
-                        }
-                    }
-                }
-                CommitResult subCommit = link.map(IBulkItemTransaction::commit).orElse(CommitResult.NO_ACTION);
-                missing.addAll(subCommit.getMissing());
-                notInserted.addAll(subCommit.getNotInserted());
-                return new CommitResult(true, missing, notInserted);
-            }).orElse(CommitResult.NO_ACTION);
-
+                link.ifPresent(IBulkExtractTransaction::commit);
+                pendingExtractTransactions = null;
+            });
         }
 
         @Override
-        public int extractItem(IndexKey key, int count, boolean simulate) {
-            int available = indices.count(key);
+        public int extractItem(IndexKey key, int count) {
+            if (pendingExtractTransactions == null)
+                pendingExtractTransactions = HashMultiset.create();
+            int available = indices.remove(key, count);
             int remainingCount = count;
             if (available < count) {
-                remainingCount = remainingCount - available;
+                //subtract here, so that at the end we don't need to handle remainingCount possibly being negative
+                //just keeps the invariant of it being >=0
+                remainingCount -= available;
+
+                pendingExtractTransactions.add(key, available);
+
+                //try to fetch the rest from the link
                 int fRemaining = remainingCount;
                 remainingCount = getBoundIndex()
                         .map(IItemIndex::bulkTransaction)
-                        .map(index -> index.extractItem(key, fRemaining, simulate))
+                        .map(index -> index.extractItem(key, fRemaining))
                         .orElse(remainingCount);
-                if (! simulate) {
-                    pendingExtractTransactions.add(key, available);
-                    indices.remove(key, available);
-                }
-            }
-            return 0;
-        }
-
-        @Override
-        public int insertItem(IndexKey key, int count, boolean simulate) {
-            return 0;
-        }
-
-        @Override
-        public IItemCache copyCache() {
-            return null;
+            } else
+                pendingExtractTransactions.add(key, count);
+            return count - remainingCount;
         }
     }
 }

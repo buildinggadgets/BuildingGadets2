@@ -5,27 +5,35 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 
 public final class IndexKey {
-    public static final IndexKey EMPTY = new IndexKey(ItemStack.EMPTY.getItem(), getIndexKeyNBT(ItemStack.EMPTY));
+    private static final IndexKey EMPTY = new IndexKey(ItemStack.EMPTY.getItem(), getIndexKeyNBT(ItemStack.EMPTY));
     private final Item item;
     private final CompoundNBT nbt;
     private int hashCode;
 
-    public IndexKey(Item item, CompoundNBT nbt) {
+    private IndexKey(Item item, CompoundNBT nbt) {
         this.hashCode = 31 * item.hashCode() + nbt.hashCode();
         this.item = item;
         this.nbt = nbt;
     }
 
-    public static CompoundNBT getIndexKeyNBT(ItemStack stack) {
+    public static IndexKey empty() {
+        return EMPTY;
+    }
+
+    public static IndexKey ofStack(ItemStack stack) {
+        if (stack.isEmpty())
+            return empty();
+        return new IndexKey(stack.getItem(), getIndexKeyNBT(stack));
+    }
+
+    private static CompoundNBT getIndexKeyNBT(ItemStack stack) {
         CompoundNBT nbt = stack.serializeNBT();
         nbt.remove("Count");
         return nbt;
     }
 
     public ItemStack createStack(int count) {
-        CompoundNBT copy = nbt.copy();
-        copy.putByte("Count", (byte) count);
-        ItemStack res = ItemStack.read(copy);
+        ItemStack res = ItemStack.read(nbt); //notice that this
         res.setCount(count); //if count is bigger then 128...
         return res;
     }

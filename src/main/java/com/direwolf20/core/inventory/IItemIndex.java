@@ -1,31 +1,35 @@
 package com.direwolf20.core.inventory;
 
+import net.minecraft.item.ItemStack;
+
 import java.util.List;
 
-public interface IItemIndex extends IItemCache {
+public interface IItemIndex {
     enum BindingResult {
         NO_BIND,
         REPLACE,
         BIND
     }
 
-    IBulkItemTransaction bulkTransaction();
+    IBulkExtractTransaction bulkTransaction();
 
-    @Override
-    default int extractItem(IndexKey key, int count, boolean simulate) {
-        IBulkItemTransaction transaction = bulkTransaction();
-        count = transaction.extractItem(key, count, simulate);
+    default int extractItem(ItemStack stack) {
+        return extractItem(IndexKey.ofStack(stack), stack.getCount());
+    }
+
+    default int extractItem(IndexKey key, int count) {
+        IBulkExtractTransaction transaction = bulkTransaction();
+        count = transaction.extractItem(key, count);
         transaction.commit();
         return count;
     }
 
-    @Override
-    default int insertItem(IndexKey key, int count, boolean simulate) {
-        IBulkItemTransaction transaction = bulkTransaction();
-        count = transaction.insertItem(key, count, simulate);
-        transaction.commit();
-        return count;
+
+    default int insertItem(ItemStack stack, int count) {
+        return insertItem(IndexKey.ofStack(stack), count);
     }
+
+    int insertItem(IndexKey key, int count);
 
     /**
      * Calling this Method will ensure that the index is accurate. Any sub-sequent extract and insert calls will reflect exactly
