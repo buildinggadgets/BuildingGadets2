@@ -53,17 +53,25 @@ public class PlayerItemIndex implements IItemIndex {
     }
 
     @Override
-    public int extractItem(ItemStack stack) {
+    public ItemExtractionCache createExtractionSimulation() {
+        ItemExtractionCache cache = new ItemExtractionCache(HashMultiset.create(indices));
+        return getBoundIndex()
+                .map(index -> ItemExtractionCache.createMerged(index.createExtractionSimulation(), cache))
+                .orElse(cache);
+    }
+
+    @Override
+    public int insertItem(ItemStack stack, boolean simulate) {
         //code copied from below, to avoid unnnessecary key creation
         return getPlayerHandler()
-                .map(handler -> insertStackIntoHandler(handler, stack, stack.getCount()))
+                .map(handler -> insertStackIntoHandler(handler, stack, stack.getCount(), simulate))
                 .orElse(0);
     }
 
     @Override
-    public int insertItem(IndexKey key, int count) {
+    public int insertItem(IndexKey key, int count, boolean simulate) {
         return getPlayerHandler()
-                .map(handler -> insertStackIntoHandler(handler, key.createStack(count), count))
+                .map(handler -> insertStackIntoHandler(handler, key.createStack(count), count, simulate))
                 .orElse(0);
     }
 
@@ -82,15 +90,15 @@ public class PlayerItemIndex implements IItemIndex {
         return true;
     }
 
-    private int insertStackIntoHandler(IItemHandler handler, ItemStack stack, int count) {
+    private int insertStackIntoHandler(IItemHandler handler, ItemStack stack, int count, boolean simulate) {
         for (int i = 0; i < handler.getSlots(); i++) {
-            stack = handler.insertItem(i, stack, false);
+            stack = handler.insertItem(i, stack, simulate);
             if (stack.isEmpty())
                 return count;
         }
         ItemStack fStack = stack;
         return getBoundIndex()
-                .map(index -> index.insertItem(fStack, fStack.getCount()))
+                .map(index -> index.insertItem(fStack, simulate))
                 .orElseGet(() -> count - fStack.getCount());
     }
 
@@ -157,7 +165,7 @@ public class PlayerItemIndex implements IItemIndex {
                         if (count == 0)
                             break;
                     }
-                    if (count != 0) {
+                    if (count != 0) { //buhoo, something went wrong with the cache - let's hope for the best
                         final int fCount = count;
                         link.ifPresent(index -> index.extractItem(entry.getElement(), fCount));
                     }

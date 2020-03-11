@@ -24,12 +24,13 @@ public interface IItemIndex {
         return count;
     }
 
+    ItemExtractionCache createExtractionSimulation();
 
-    default int insertItem(ItemStack stack, int count) {
-        return insertItem(IndexKey.ofStack(stack), count);
+    default int insertItem(ItemStack stack, boolean simulate) {
+        return insertItem(IndexKey.ofStack(stack), stack.getCount(), simulate);
     }
 
-    int insertItem(IndexKey key, int count);
+    int insertItem(IndexKey key, int count, boolean simulate);
 
     /**
      * Calling this Method will ensure that the index is accurate. Any sub-sequent extract and insert calls will reflect exactly
