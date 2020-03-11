@@ -4,6 +4,7 @@ import com.direwolf20.core.properties.IPropertyContainer;
 import com.direwolf20.core.properties.ModificationPropertyContainer;
 import com.direwolf20.core.traits.ITraitContainer;
 import com.direwolf20.core.traits.ModificationTraitContainer;
+import com.direwolf20.core.traits.upgrade.UpgradeStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
@@ -20,7 +21,7 @@ import javax.annotation.Nullable;
  * An intentionally subclassable {@link ICapabilityProvider} implementation which gives access to both an {@link ITraitContainer}
  * and an {@link IPropertyContainer}. This Provider is intended to be used with an {@link ItemStack} and will update a
  * {@link #KEY_CHANGE_COUNT change count} property on the stack's {@link ItemStack#getTag() NBT-Tag}, every time a
- * {@link com.direwolf20.core.properties.Property Property} is modified or an {@link com.direwolf20.core.traits.upgrade.TieredUpgrade Upgrade}
+ * {@link com.direwolf20.core.properties.Property Property} is modified or an {@link UpgradeStack Upgrade}
  * is installed. As a result it is possible to implement syncing by reading and writing the nbt data of both caps to
  * the {@link net.minecraft.item.Item#getShareTag(ItemStack) ItemStacks Share Tag}. This change count is intentionally only a byte
  * and will overflow from time to time - this won't hurt us, as we only need it to change.

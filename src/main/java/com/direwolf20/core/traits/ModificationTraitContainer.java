@@ -1,7 +1,7 @@
 package com.direwolf20.core.traits;
 
-import com.direwolf20.core.traits.upgrade.TieredUpgrade;
 import com.direwolf20.core.traits.upgrade.Upgrade;
+import com.direwolf20.core.traits.upgrade.UpgradeStack;
 import net.minecraft.nbt.CompoundNBT;
 
 import java.util.Optional;
@@ -15,9 +15,9 @@ import java.util.function.BiConsumer;
  */
 public final class ModificationTraitContainer implements ITraitContainer{
     private final ITraitContainer delegate;
-    private final BiConsumer<TieredUpgrade, Boolean> upgradeCallback;
+    private final BiConsumer<UpgradeStack, Boolean> upgradeCallback;
 
-    public ModificationTraitContainer(ITraitContainer delegate, BiConsumer<TieredUpgrade, Boolean> upgradeCallback) {
+    public ModificationTraitContainer(ITraitContainer delegate, BiConsumer<UpgradeStack, Boolean> upgradeCallback) {
         this.delegate = delegate;
         this.upgradeCallback = upgradeCallback;
     }
@@ -28,7 +28,7 @@ public final class ModificationTraitContainer implements ITraitContainer{
     }
 
     @Override
-    public Set<TieredUpgrade> listTiers() {
+    public Set<UpgradeStack> listTiers() {
         return delegate.listTiers();
     }
 
@@ -43,7 +43,7 @@ public final class ModificationTraitContainer implements ITraitContainer{
     }
 
     @Override
-    public boolean installUpgrade(TieredUpgrade upgrade) {
+    public boolean installUpgrade(UpgradeStack upgrade) {
         if (delegate.installUpgrade(upgrade)) {
             this.upgradeCallback.accept(upgrade, true);
             return true;
@@ -52,7 +52,7 @@ public final class ModificationTraitContainer implements ITraitContainer{
     }
 
     @Override
-    public boolean removeUpgrade(TieredUpgrade upgrade) {
+    public boolean removeUpgrade(UpgradeStack upgrade) {
         if (delegate.removeUpgrade(upgrade)) {
             this.upgradeCallback.accept(upgrade, false);
             return true;

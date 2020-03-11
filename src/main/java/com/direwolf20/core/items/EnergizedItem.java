@@ -25,25 +25,29 @@ import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * Abstract Base class for an FE using Gadget. The {@link IEnergyStorage} implementation used by this Gadget is guaranteed to
  * be an instance of {@link INBTSerializable<INBT>}, which will be synced from Server to Client automatically. For the {@link TraitEnergyStorage}
- * to be backed by appropriate default values, the abstract Methods {@link #getMaxEnergy()}, {@link #getMaxReceive()} and {@link #getMaxExtract()}
- * were added. These are meant to return the corresponding config value or some function of it.
+ * to be backed by appropriate default values, you can pass the default supplier for max energy to the constructor.
+ * This supplier is meant to return the corresponding config value or some function of it.
  * <p>
  * Notice that this class also adds both the {@link IPropertyContainer} and {@link ITraitContainer} capabilities and enables
  * subclasses to add their own {@link Trait Traits} and {@link com.direwolf20.core.properties.Property Properties} by
  * overriding {@link #onAttachTraits(Builder)} and {@link #onAttachProperties(PropertyContainer.Builder)}. These will be synced
  * alongside the {@link IEnergyStorage} capability.
  */
-public abstract class EnergizedGadget extends Item {
+public abstract class EnergizedItem extends Item {
     private static final String KEY_ENERGY = "energy";
     private static final String KEY_PROPERTIES = "properties";
     private static final String KEY_TRAITS = "traits";
+    private final Supplier<Integer> maxEnergyDefault;
 
-    public EnergizedGadget(Properties properties) {
+    public EnergizedItem(Properties properties, Supplier<Integer> maxEnergyDefault) {
         super(properties);
+        this.maxEnergyDefault = Objects.requireNonNull(maxEnergyDefault);
     }
 
     /**
@@ -93,27 +97,21 @@ public abstract class EnergizedGadget extends Item {
     }
 
     /**
-     * Override this Method to add your own Traits to the resulting Gadget. By default {@link Trait#MAX_ENERGY},
-     * {@link Trait#MAX_RECEIVE} and {@link Trait#MAX_EXTRACT} will be added using the matching abstract
-     * Methods as suppliers for the default values. If you want to use different Traits for you {@link IEnergyStorage}
-     * (for example because you want to use different upgrades), just don't call super and adapt the {@link EnergyCapabilityProvider}
-     * accordingly.
+     * Override this Method to add your own Traits to the resulting Gadget. By default {@link Trait#MAX_ENERGY} will be added
+     * using the default supplier passed to the constructor, whilst the {@link Trait#MAX_EXTRACT}, {@link Trait#MAX_RECEIVE} will
+     * be set to a supplier returning {@link Integer#MAX_VALUE}, as per @Direwolf20's request.
+     * If you want to use different Traits for your {@link IEnergyStorage} (for example because you want to use different upgrades),
+     * just don't call super and adapt the {@link EnergyCapabilityProvider} accordingly.
      *
      * @param builder The {@link PropertyContainer.Builder} used for adding Properties
      * @return the passed in builder instance, to allow for Method chaining
      */
     protected TraitContainer.Builder onAttachTraits(TraitContainer.Builder builder) {
         return builder
-                .putTrait(Trait.MAX_ENERGY, this::getMaxEnergy)
-                .putTrait(Trait.MAX_EXTRACT, this::getMaxExtract)
-                .putTrait(Trait.MAX_RECEIVE, this::getMaxReceive);
+                .putTrait(Trait.MAX_ENERGY, maxEnergyDefault)
+                .putTrait(Trait.MAX_EXTRACT, () -> Integer.MAX_VALUE)
+                .putTrait(Trait.MAX_RECEIVE, () -> Integer.MAX_VALUE);
     }
-
-    protected abstract int getMaxEnergy();
-
-    protected abstract int getMaxReceive();
-
-    protected abstract int getMaxExtract();
 
     @Nullable
     @Override

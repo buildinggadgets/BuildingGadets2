@@ -1,7 +1,6 @@
-package com.direwolf20.buildinggadgets.common.registry;
+package com.direwolf20.buildinggadgets.common.items;
 
 import com.direwolf20.buildinggadgets.BuildingGadgets;
-import com.direwolf20.buildinggadgets.common.items.BuildingGadget;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -9,7 +8,7 @@ import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public enum  BGItems {
+public enum BGItems {
     ;
     public static final ItemGroup ITEM_GROUP = new ItemGroup(BuildingGadgets.MOD_ID) {
         @Override

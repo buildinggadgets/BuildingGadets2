@@ -1,7 +1,7 @@
 package com.direwolf20.core.traits;
 
-import com.direwolf20.core.traits.upgrade.TieredUpgrade;
 import com.direwolf20.core.traits.upgrade.Upgrade;
+import com.direwolf20.core.traits.upgrade.UpgradeStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 
@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
  * function as a generic container for values - {@link Trait Traits} are characteristic Properties of some Object and should only
  * be upgraded, not set to some arbitrary value.
  * <p>
- * Installing and removing upgrades can be done via {@link #installUpgrade(TieredUpgrade)} and {@link #removeUpgrade(TieredUpgrade)}
- * respectively. The {@link TieredUpgrade upgrades} will directly reflect on the returned {@link Trait} values and no post-processing
+ * Installing and removing upgrades can be done via {@link #installUpgrade(UpgradeStack)} and {@link #removeUpgrade(UpgradeStack)}
+ * respectively. The {@link UpgradeStack upgrades} will directly reflect on the returned {@link Trait} values and no post-processing
  * needed. For example instead of checking the base cost to mine some block and then adding the cost for every installed upgrade,
  * one can directly query {@code container.getTrait(Trait.ACTION_COST)} and get the appropriate value.
  * <p>
@@ -29,17 +29,17 @@ import java.util.stream.Collectors;
 public interface ITraitContainer extends INBTSerializable<CompoundNBT> {
     <T> Optional<T> getTrait(Trait<T> trait);
 
-    Set<TieredUpgrade> listTiers();
+    Set<UpgradeStack> listTiers();
 
     Set<Trait<?>> listTraits();
 
     default Set<Upgrade> listUpgrades() {
-        return listTiers().stream().map(TieredUpgrade::getUpgrade).collect(Collectors.toSet());
+        return listTiers().stream().map(UpgradeStack::getUpgrade).collect(Collectors.toSet());
     }
 
-    boolean installUpgrade(TieredUpgrade upgrade);
+    boolean installUpgrade(UpgradeStack upgrade);
 
-    boolean removeUpgrade(TieredUpgrade upgrade);
+    boolean removeUpgrade(UpgradeStack upgrade);
 
     CompoundNBT serializeNBT(boolean persistend);
 

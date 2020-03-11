@@ -30,19 +30,15 @@ public final class Trait<T> {
         Preconditions.checkNotNull(name);
         Preconditions.checkArgument(!name.isEmpty());
         this.type = Objects.requireNonNull(type);
-        this.name = name;
-    }
-
-    public static <T> Trait<T> create(Class<T> type, String name) {
-        return new Trait<>(type, name);
+        this.name = Objects.requireNonNull(name);
     }
 
     public static <T> Trait<T> createNamespaced(Class<T> type, String namespace, String path) {
-        return create(type, namespace + ":" + path);
+        return new Trait<>(type, namespace + ":" + path);
     }
 
     public static <T> Trait<T> createNamespaced(Class<T> type, ResourceLocation name) {
-        return create(type, name.toString());
+        return new Trait<>(type, name.toString());
     }
 
     T cast(Object v) {

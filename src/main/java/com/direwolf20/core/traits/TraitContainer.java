@@ -1,7 +1,7 @@
 package com.direwolf20.core.traits;
 
-import com.direwolf20.core.traits.upgrade.TieredUpgrade;
 import com.direwolf20.core.traits.upgrade.Upgrade;
+import com.direwolf20.core.traits.upgrade.UpgradeStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
@@ -19,7 +19,7 @@ public final class TraitContainer implements ITraitContainer {
     private Map<Trait<?>, TraitValue<?>> traits;
     //for ease of lookup
     private Set<Upgrade> installedUpgrades;
-    private Set<TieredUpgrade> installedTiers;
+    private Set<UpgradeStack> installedTiers;
     private TraitContainer(Map<Trait<?>, TraitValue<?>> traits) {
         this.traits = traits;
         this.installedTiers = new LinkedHashSet<>();
@@ -38,7 +38,7 @@ public final class TraitContainer implements ITraitContainer {
     }
 
     @Override
-    public Set<TieredUpgrade> listTiers() {
+    public Set<UpgradeStack> listTiers() {
         return Collections.unmodifiableSet(installedTiers);
     }
 
@@ -54,26 +54,21 @@ public final class TraitContainer implements ITraitContainer {
     }
 
     @Override
-    public boolean installUpgrade(TieredUpgrade upgrade) {
+    public boolean installUpgrade(UpgradeStack upgrade) {
         if (installedUpgrades.contains(upgrade.getUpgrade()) || installedTiers.contains(upgrade))
             return false;
-        if (!traits.keySet().containsAll(upgrade.getAppliedModifications()))
+        if (! traits.keySet().containsAll(upgrade.getAppliedModifications()))
             return false;
         for (Trait<?> characteristic : upgrade.getAppliedModifications()) {
-            if (!applyModificator(characteristic, traits.get(characteristic), upgrade))
+            if (! applyModificator(characteristic, traits.get(characteristic), upgrade))
                 throw new RuntimeException("Found inconsistency in registered upgrades and known upgrades by traits. This is a bug!");
         }
         return installedTiers.add(upgrade) && installedUpgrades.add(upgrade.getUpgrade());
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> boolean applyModificator(Trait<T> characteristic, TraitValue<?> value, TieredUpgrade upgrade) {
-        return ((TraitValue<T>) value).addModificator(upgrade, upgrade.getModificatorFor(characteristic));
-    }
-
     @Override
-    public boolean removeUpgrade(TieredUpgrade upgrade) {
-        if (!installedTiers.contains(upgrade) || !installedUpgrades.contains(upgrade.getUpgrade()))
+    public boolean removeUpgrade(UpgradeStack upgrade) {
+        if (! installedTiers.contains(upgrade) || ! installedUpgrades.contains(upgrade.getUpgrade()))
             return false;
         for (Trait<?> characteristic : upgrade.getAppliedModifications()) {
             if (traits.get(characteristic).removeModificator(upgrade))
@@ -86,7 +81,7 @@ public final class TraitContainer implements ITraitContainer {
     public CompoundNBT serializeNBT(boolean persistent) {
         CompoundNBT compound = new CompoundNBT();
         ListNBT installedUpgrades = new ListNBT();
-        for (TieredUpgrade upgrade : installedTiers)
+        for (UpgradeStack upgrade : installedTiers)
             installedUpgrades.add(upgrade.serializeNBT(persistent));
         compound.put(KEY_INSTALLED_UPGRADES, installedUpgrades);
         return compound;
@@ -105,9 +100,14 @@ public final class TraitContainer implements ITraitContainer {
                 val.clearModificators();
         }
         for (INBT serializedTier : list) {
-            TieredUpgrade upgrade = TieredUpgrade.deserialize((CompoundNBT) serializedTier);
+            UpgradeStack upgrade = UpgradeStack.deserialize((CompoundNBT) serializedTier);
             installUpgrade(upgrade);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> boolean applyModificator(Trait<T> characteristic, TraitValue<?> value, UpgradeStack upgrade) {
+        return ((TraitValue<T>) value).addModificator(upgrade, upgrade.getModificatorFor(characteristic));
     }
 
     /**
