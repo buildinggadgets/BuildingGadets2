@@ -1,22 +1,28 @@
 package com.direwolf20.buildinggadgets.common.inventory;
 
-import com.google.common.collect.HashMultiset;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multiset;
 import net.minecraft.item.ItemStack;
 
+import java.util.List;
 import java.util.Objects;
 
 public final class ItemExtractionCache {
-    private final Multiset<IndexKey> cache;
+    private final List<Multiset<IndexKey>> caches;
 
-    public ItemExtractionCache(Multiset<IndexKey> cache) {
-        this.cache = Objects.requireNonNull(cache);
+    public ItemExtractionCache(List<Multiset<IndexKey>> cache) {
+        this.caches = Objects.requireNonNull(cache);
     }
 
-    public static ItemExtractionCache createMerged(ItemExtractionCache cache1, ItemExtractionCache cache2) {
-        HashMultiset<IndexKey> cache = HashMultiset.create(cache1.cache);
-        cache.addAll(cache2.cache);
-        return new ItemExtractionCache(cache);
+    public ItemExtractionCache(Multiset<IndexKey> cache) {
+        this(ImmutableList.of(cache));
+    }
+
+    public static ItemExtractionCache createMerged(ItemExtractionCache... caches) {
+        ImmutableList.Builder<Multiset<IndexKey>> builder = ImmutableList.builder();
+        for (ItemExtractionCache cache : caches)
+            builder.addAll(cache.caches);
+        return new ItemExtractionCache(builder.build());
     }
 
     public int simulateExtract(ItemStack stack) {
@@ -24,6 +30,12 @@ public final class ItemExtractionCache {
     }
 
     public int simulateExtract(IndexKey key, int count) {
-        return Math.max(cache.remove(key, count) - count, 0);
+        for (Multiset<IndexKey> cache : caches) {
+            int available = cache.remove(key, count);
+            count = available > count ? 0 : count - available;
+            if (count <= 0)
+                return 0;
+        }
+        return count;
     }
 }

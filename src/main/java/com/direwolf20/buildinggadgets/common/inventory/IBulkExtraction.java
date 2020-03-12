@@ -2,14 +2,12 @@ package com.direwolf20.buildinggadgets.common.inventory;
 
 import net.minecraft.item.ItemStack;
 
-public interface IBulkExtractTransaction {
+public interface IBulkExtraction {
     void commit();
 
-    default int extractItem(ItemStack stack, int count) {
-        return extractItem(IndexKey.ofStack(stack), count);
+    default int extractItem(ItemStack stack) {
+        return extractItem(IndexKey.ofStack(stack), stack.getCount());
     }
 
     int extractItem(IndexKey key, int count);
-
-
 }

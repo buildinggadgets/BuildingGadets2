@@ -7,6 +7,9 @@ import com.google.common.collect.Multiset;
 import com.google.common.collect.Multiset.Entry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraftforge.common.util.Constants.NBT;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -14,16 +17,17 @@ import net.minecraftforge.items.IItemHandler;
 import java.lang.ref.WeakReference;
 import java.util.*;
 
-public class PlayerItemIndex implements IItemIndex {
+public class PlayerItemIndex implements IItemIndex, INBTSerializable<CompoundNBT> {
+    private static final String KEY_BOUND_INV = "bound_inv";
     private final WeakReference<PlayerEntity> player;
     private InventoryLink boundInv;
     private final Multiset<IndexKey> indices;
     private final Multimap<IndexKey, Integer> slotByItem;
-    private PlayerExtractTransaction transaction;
+    private PlayerBulkExtraction transaction;
 
     public PlayerItemIndex(PlayerEntity player) {
         this.player = new WeakReference<>(Objects.requireNonNull(player, "A player Item Index always requires a player to start with!"));
-        this.transaction = new PlayerExtractTransaction();
+        this.transaction = new PlayerBulkExtraction();
         this.boundInv = null;
         this.indices = HashMultiset.create();
         this.slotByItem = ArrayListMultimap.create();
@@ -39,7 +43,10 @@ public class PlayerItemIndex implements IItemIndex {
     }
 
     private Optional<IItemIndex> getBoundIndex() {
-        return boundInv != null ? boundInv.getIndex() : Optional.empty();
+        PlayerEntity thePlayer = player.get();
+        return Optional.ofNullable(boundInv)
+                .filter(b -> thePlayer != null)
+                .flatMap(b -> b.getIndex(thePlayer.world));
     }
 
     private LazyOptional<IItemHandler> getPlayerHandler() {
@@ -48,7 +55,7 @@ public class PlayerItemIndex implements IItemIndex {
     }
 
     @Override
-    public IBulkExtractTransaction bulkTransaction() {
+    public IBulkExtraction bulkTransaction() {
         return transaction;
     }
 
@@ -88,6 +95,20 @@ public class PlayerItemIndex implements IItemIndex {
         //player inventory is so small - always re-Index...
         performIndex();
         return true;
+    }
+
+    @Override
+    public CompoundNBT serializeNBT() {
+        CompoundNBT nbt = new CompoundNBT();
+        if (boundInv != null)
+            nbt.put(KEY_BOUND_INV, boundInv.serializeNBT());
+        return nbt;
+    }
+
+    @Override
+    public void deserializeNBT(CompoundNBT nbt) {
+        if (nbt.contains(KEY_BOUND_INV, NBT.TAG_COMPOUND))
+            boundInv = InventoryLink.deserialize(nbt.getCompound(KEY_BOUND_INV));
     }
 
     private int insertStackIntoHandler(IItemHandler handler, ItemStack stack, int count, boolean simulate) {
@@ -139,10 +160,10 @@ public class PlayerItemIndex implements IItemIndex {
         return boundInv != null ? Collections.singletonList(boundInv) : Collections.emptyList();
     }
 
-    private final class PlayerExtractTransaction implements IBulkExtractTransaction {
+    private final class PlayerBulkExtraction implements IBulkExtraction {
         private Multiset<IndexKey> pendingExtractTransactions;
 
-        public PlayerExtractTransaction() {
+        public PlayerBulkExtraction() {
             this.pendingExtractTransactions = null;
         }
 
@@ -151,7 +172,7 @@ public class PlayerItemIndex implements IItemIndex {
             if (pendingExtractTransactions == null || pendingExtractTransactions.isEmpty())
                 return;
             getPlayerHandler().ifPresent(handler -> {
-                Optional<IBulkExtractTransaction> link = getBoundIndex().map(IItemIndex::bulkTransaction);
+                Optional<IBulkExtraction> link = getBoundIndex().map(IItemIndex::bulkTransaction);
                 for (Entry<IndexKey> entry : pendingExtractTransactions.entrySet()) {
                     int count = entry.getCount();
                     Iterator<Integer> it = slotByItem.get(entry.getElement()).iterator();
@@ -170,7 +191,7 @@ public class PlayerItemIndex implements IItemIndex {
                         link.ifPresent(index -> index.extractItem(entry.getElement(), fCount));
                     }
                 }
-                link.ifPresent(IBulkExtractTransaction::commit);
+                link.ifPresent(IBulkExtraction::commit);
                 pendingExtractTransactions = null;
             });
         }

@@ -11,14 +11,14 @@ public interface IItemIndex {
         BIND
     }
 
-    IBulkExtractTransaction bulkTransaction();
+    IBulkExtraction bulkTransaction();
 
     default int extractItem(ItemStack stack) {
         return extractItem(IndexKey.ofStack(stack), stack.getCount());
     }
 
     default int extractItem(IndexKey key, int count) {
-        IBulkExtractTransaction transaction = bulkTransaction();
+        IBulkExtraction transaction = bulkTransaction();
         count = transaction.extractItem(key, count);
         transaction.commit();
         return count;
